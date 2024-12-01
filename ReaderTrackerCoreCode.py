@@ -19,11 +19,28 @@ class Book:
         self.author = author
         self.year = year
 
-    def printBook(self):
+    # TODO add function that notes a book is read(removes from collections and adds to the read list)
+
+    def print_book(self):
         print(f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}")
 
-# TODO Create a BookCollection class
+
 # This class will represent a collection of books.
 # It will provide functionality to add and remove books, and sort them
 # how the user customizes.
 # Will need to figure out how to book books from one collection to another ones read
+class BookCollection:
+    def __init__(self):
+        self.books = []  # Initialize the empty list
+
+    # TODO Test this function
+    def add_book(self, book: Book):
+        self.books.append(book)
+        self.books.sort(key=lambda x: x.author)  # Sorts the books everytime another book is added
+
+    # TODO Test this function
+    def remove_book(self, book: Book):
+        try:
+            self.books.remove(book)
+        except ValueError:
+            print("Item not found in list")
