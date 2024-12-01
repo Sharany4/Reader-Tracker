@@ -21,8 +21,8 @@ class Book:
 
     # TODO add function that notes a book is read(removes from collections and adds to the read list)
 
-    def print_book(self):
-        print(f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}")
+    def get_book_details(self):
+        return f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}"
 
 
 # This class will represent a collection of books.
@@ -33,7 +33,6 @@ class BookCollection:
     def __init__(self):
         self.books = []  # Initialize the empty list
 
-    # TODO Test this function
     def add_book(self, book: Book):
         self.books.append(book)
         self.books.sort(key=lambda x: x.author)  # Sorts the books everytime another book is added
@@ -44,3 +43,7 @@ class BookCollection:
             self.books.remove(book)
         except ValueError:
             print("Item not found in list")
+
+    def print_collection(self):
+        for b in self.books:
+            print(b.get_book_details())
