@@ -6,9 +6,8 @@
 # Later this will be expanded so the can create custom lists.
 
 
-# TODO Create a Book class
 # This class will have a title, author, year
-# It will also store what collections it is apart of
+# It will also store what collections it is a part of
 # It will also have a to string method to represent itself
 class Book:
     def __init__(self, title: str, author: str, year: int):
@@ -34,15 +33,18 @@ class BookCollection:
         self.books = []  # Initialize the empty list
 
     def add_book(self, book: Book):
+        if not isinstance(book, Book):
+            raise TypeError("Only books can be added")
         self.books.append(book)
         self.books.sort(key=lambda x: x.author)  # Sorts the books everytime another book is added
 
     # TODO Test this function
     def remove_book(self, book: Book):
-        try:
-            self.books.remove(book)
-        except ValueError:
-            print("Item not found in list")
+        if not isinstance(book, Book):
+            raise TypeError("Only books can be removed")
+        if book not in self.books:
+            raise ValueError("The book is not in the collection")
+        self.books.remove(book)
 
     def print_collection(self):
         for b in self.books:

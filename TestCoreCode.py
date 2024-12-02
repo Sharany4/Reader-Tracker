@@ -28,13 +28,16 @@ class TestBookCreation(unittest.TestCase):
 
 # Class for testing the book collection functionality
 class TestBookCollection(unittest.TestCase):
+    # fields used for testing
     test_book = Book("Fake title", "Fake author", 1000)
     test_book_a = Book("Fake title a", "aaaa", 1000)
     test_book_b = Book("Fake title b", "bbbb", 1000)
     test_book_c = Book("Fake title c", "cccc", 1000)
     correct_list_ab = [test_book_a, test_book_b]
     correct_list_abc = [test_book_a, test_book_b, test_book_c]
+    correct_list_ac = [test_book_a, test_book_c]
 
+    # Test that the constructor works correctly
     def test_can_create_a_collection(self):
         book_coll = BookCollection()
         book_coll.print_collection()
@@ -43,6 +46,7 @@ class TestBookCollection(unittest.TestCase):
         with self.assertRaises(TypeError):
             test_coll = BookCollection(TestBookCollection.test_book)
 
+    # Test the add method works correctly
     def test_coll_can_add_books(self):
         test_coll = BookCollection()
         test_coll.add_book(TestBookCollection.test_book)
@@ -70,8 +74,42 @@ class TestBookCollection(unittest.TestCase):
         self.assertEqual(test_coll.books, TestBookCollection.correct_list_abc)
         test_coll.print_collection()
 
+    def test_coll_wont_take_non_book(self):
+        test_coll = BookCollection()
+        with self.assertRaises(TypeError):
+            test_coll.add_book(1)
 
-# TODO: Write tests for book collection
-# TODO: Write tests for books with book collection
+    # Test that the remove function works correctly
+    def test_coll_can_remove_a_book(self):
+        test_coll = BookCollection()
+        test_coll.add_book(TestBookCollection.test_book)
+        self.assertIn(TestBookCollection.test_book, test_coll.books)
+        test_coll.remove_book(TestBookCollection.test_book)
+        self.assertEqual(test_coll.books, [])
+        self.assertNotIn(TestBookCollection.test_book, test_coll.books)
+
+    def test_coll_keeps_order_when_removing_1(self):
+        test_coll = BookCollection()
+        test_coll.add_book(TestBookCollection.test_book_a)
+        test_coll.add_book(TestBookCollection.test_book_b)
+        test_coll.add_book(TestBookCollection.test_book_c)
+        self.assertEqual(test_coll.books, TestBookCollection.correct_list_abc)
+        test_coll.remove_book(TestBookCollection.test_book_b)
+        self.assertEqual(test_coll.books, TestBookCollection.correct_list_ac)  # Check 'b' is removed
+        self.assertEqual(test_coll.books[0], TestBookCollection.test_book_a)  # Check the first element is correct
+
+    def test_cant_remove_a_non_book(self):
+        test_coll = BookCollection()
+        with self.assertRaises(TypeError):
+            test_coll.remove_book(1)
+
+    def test_error_thrown_if_book_not_in_coll(self):
+        test_coll = BookCollection()
+        with self.assertRaises(ValueError):
+            test_coll.remove_book(TestBookCollection.test_book_a)
+
+
+# TODO: Write tests for testing orders by title if same author
+# TODO: Write tests that a duplicate entry is not added
 if __name__ == '__main__':
     unittest.main()
