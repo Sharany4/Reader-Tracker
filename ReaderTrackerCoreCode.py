@@ -38,9 +38,8 @@ class BookCollection:
         if book in self.books:
             raise DuplicateError(f" Book {book} is already in the collection")
         self.books.append(book)
-        self.books.sort(key=lambda x: x.author)  # Sorts the books everytime another book is added
+        self.books.sort(key=lambda x: (x.author, x.title))  # Sorts the books everytime another book is added
 
-    # TODO Test this function
     def remove_book(self, book: Book):
         if not isinstance(book, Book):
             raise TypeError("Only books can be removed")

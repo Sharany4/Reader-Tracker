@@ -40,7 +40,6 @@ class TestBookCollection(unittest.TestCase):
     # Test that the constructor works correctly
     def test_can_create_a_collection(self):
         book_coll = BookCollection()
-        book_coll.print_collection()
 
     def test_collection_takes_no_args(self):
         with self.assertRaises(TypeError):
@@ -129,7 +128,17 @@ class TestBookCollection(unittest.TestCase):
             test_coll.add_book(TestBookCollection.test_book_a)
         self.assertEqual(test_coll.books, TestBookCollection.correct_list_abc)
 
+    def test_books_with_same_author_ordered_by_title(self):
+        test_book_same_auth_first = Book("aaaa", "aaaa", 1000)
+        test_book_same_auth_sec = Book("bbbb", "aaaa", 1000)
+        test_book_same_auth_third = Book("cccc", "aaaa", 1000)
+        correct_order_title_123 = [test_book_same_auth_first, test_book_same_auth_sec, test_book_same_auth_third]
+        test_coll = BookCollection()
+        test_coll.add_book(test_book_same_auth_third)
+        test_coll.add_book(test_book_same_auth_sec)
+        test_coll.add_book(test_book_same_auth_first)
+        self.assertEqual(test_coll.books, correct_order_title_123)
 
-# TODO: Write tests for testing orders by title if same author
+
 if __name__ == '__main__':
     unittest.main()
