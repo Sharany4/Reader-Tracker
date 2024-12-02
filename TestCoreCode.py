@@ -3,7 +3,7 @@
 # Imports
 import unittest
 
-from ReaderTrackerCoreCode import Book, BookCollection
+from ReaderTrackerCoreCode import Book, BookCollection, DuplicateError
 
 
 # Class for testing the book functionality
@@ -108,8 +108,28 @@ class TestBookCollection(unittest.TestCase):
         with self.assertRaises(ValueError):
             test_coll.remove_book(TestBookCollection.test_book_a)
 
+    def test_order_correct_when_adding_and_removing(self):
+        test_coll = BookCollection()
+        test_coll.add_book(TestBookCollection.test_book_c)
+        test_coll.add_book(TestBookCollection.test_book_b)
+        test_coll.add_book(TestBookCollection.test_book_a)
+        self.assertEqual(test_coll.books, TestBookCollection.correct_list_abc)
+        test_coll.remove_book(TestBookCollection.test_book_b)
+        self.assertEqual(test_coll.books, TestBookCollection.correct_list_ac)
+        test_coll.add_book(TestBookCollection.test_book_b)
+        self.assertEqual(test_coll.books, TestBookCollection.correct_list_abc)
+
+    def test_doesnt_add_book_again_if_present(self):
+        test_coll = BookCollection()
+        test_coll.add_book(TestBookCollection.test_book_a)
+        test_coll.add_book(TestBookCollection.test_book_b)
+        test_coll.add_book(TestBookCollection.test_book_c)
+        self.assertEqual(test_coll.books, TestBookCollection.correct_list_abc)
+        with self.assertRaises(DuplicateError):
+            test_coll.add_book(TestBookCollection.test_book_a)
+        self.assertEqual(test_coll.books, TestBookCollection.correct_list_abc)
+
 
 # TODO: Write tests for testing orders by title if same author
-# TODO: Write tests that a duplicate entry is not added
 if __name__ == '__main__':
     unittest.main()

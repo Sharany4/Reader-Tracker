@@ -35,6 +35,8 @@ class BookCollection:
     def add_book(self, book: Book):
         if not isinstance(book, Book):
             raise TypeError("Only books can be added")
+        if book in self.books:
+            raise DuplicateError(f" Book {book} is already in the collection")
         self.books.append(book)
         self.books.sort(key=lambda x: x.author)  # Sorts the books everytime another book is added
 
@@ -49,3 +51,9 @@ class BookCollection:
     def print_collection(self):
         for b in self.books:
             print(b.get_book_details())
+
+
+# class for creating a exception when trying to add a duplicate
+class DuplicateError(Exception):
+    """Custom exception raised when a duplicate item is added."""
+    pass
