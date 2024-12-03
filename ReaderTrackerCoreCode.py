@@ -13,12 +13,21 @@ class Book:
     def __init__(self, title: str, author: str, year: int):
         if not title or not author or not year:
             raise ValueError("Title, author and year must not be empty")
-
         self.title = title
         self.author = author
         self.year = year
+        self.collections = []
 
     # TODO add function that notes a book is read(removes from collections and adds to the read list)
+    # To be finished once JSON saving is implemented
+    def note_book_as_read(self):
+        #add book to json of completed books
+        for coll in self.collections:
+            coll.remove_book(self)
+
+    def add_collection(self, coll: "BookCollection"):
+        self.collections.append(coll)
+
 
     def get_book_details(self):
         return f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}"
