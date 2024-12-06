@@ -1,4 +1,5 @@
 # In this file I am creating the core functionality for my project
+import json
 
 
 # My initial implementation will be to make the user
@@ -24,6 +25,7 @@ class Book:
         # add book to json of completed books
         for coll in self.collections:
             coll.remove_book(self)
+            # print(self.book_to_JSON())
 
     def add_collection(self, coll: "BookCollection"):
         self.collections.append(coll)
@@ -31,7 +33,16 @@ class Book:
     def get_book_details(self):
         return f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}"
 
-    # TODO: Create method to serialise and deserialise a book object
+    # TODO: Create function to serialise and deserialise a book object
+    def to_dict(self):  # creates the book in dictionary form
+        return {
+            "title": self.title,
+            "author": self.author,
+            "year": self.year
+        }
+
+    def book_to_json(self):
+        return json.dumps(self.to_dict())
 
 
 # This class will represent a collection of books.
@@ -64,7 +75,7 @@ class BookCollection:
         for b in self.books:
             print(b.get_book_details())
 
-    # TODO: Create method to serialise and deserialise a book object
+    # TODO: Create method to serialise and deserialise a colleciton object
 
 
 # TODO: create library class
