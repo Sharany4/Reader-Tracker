@@ -14,6 +14,7 @@ class Book:
     def __init__(self, title: str, author: str, year: int):
         if not title or not author or not year:
             raise ValueError("Title, author and year must not be empty")
+        # check book is not already in read list
         self.title = title
         self.author = author
         self.year = year
@@ -25,7 +26,7 @@ class Book:
         # add book to json of completed books
         for coll in self.collections:
             coll.remove_book(self)
-            # print(self.book_to_JSON())
+            # add to the read list
 
     def add_collection(self, coll: "BookCollection"):
         self.collections.append(coll)
@@ -33,7 +34,7 @@ class Book:
     def get_book_details(self):
         return f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}"
 
-    # TODO: Create function to serialise and deserialise a book object
+    # TODO: Create function to serialise and deserialize a book object
     def to_dict(self):  # creates the book in dictionary form
         return {
             "title": self.title,
@@ -43,6 +44,11 @@ class Book:
 
     def book_to_json(self):
         return json.dumps(self.to_dict())
+
+    @staticmethod
+    def book_from_json(json_string):
+        book_dict = json.loads(json_string)
+        return Book(book_dict['title'], book_dict['author'], book_dict['year'])
 
 
 # This class will represent a collection of books.
