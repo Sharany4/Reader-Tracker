@@ -81,7 +81,7 @@ class BookCollection:
         for b in self.books:
             print(b.get_book_details())
 
-    # TODO: Create method to serialise and deserialise a colleciton object
+    # TODO: Create method to serialise and deserialise a collection object
 
 
 # TODO: create library class
@@ -89,8 +89,8 @@ class BookCollection:
 # class Library:
 # def __int__(self):
 # load up GUI
-# let user see collctions to view
-# let user click collections and books to makr as read
+# let user see collections to view
+# let user click collections and books to mark as read
 # load collections
 # add collection
 # delete collection
@@ -98,7 +98,7 @@ class BookCollection:
 # remove book from this collection
 
 
-# class for creating a exception when trying to add a duplicate
+# class for creating an exception when trying to add a duplicate
 class DuplicateError(Exception):
     """Custom exception raised when a duplicate item is added."""
     pass

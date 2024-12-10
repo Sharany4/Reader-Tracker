@@ -1,0 +1,23 @@
+To-Do List for Reader Tracker Project
+
+1. Define and Implement Storage System (SO can easily extend to database in the future)
+    - Create a `Storage` class: Implement a base class that outlines the interface for saving and loading data.
+    - Implement JSON Storage: Create a `JSONStorage` class that handles the reading and writing of book data to JSON files.
+    - Ensure Flexibility for Storage Type: Allow the system to smoothly transition between storage formats (JSON and Database) without affecting core functionalities.
+
+2. Update Core Code
+    - Modify the save method: Ensure that the core logic uses the `Storage` class for saving books and collections, so that the storage type is abstracted away.
+    - Modify the load method: Update the core code to load data from the correct storage type, whether it's a JSON file or a database.
+
+3. Design and Implement the Library Class
+    - Create the `Library` class: This class will handle book and collection management, including adding new books and retrieving the list of books.
+    - Pass the Storage Type: Make sure that the `Library` class accepts the storage type as a parameter, so it can interact with different storage backends seamlessly.
+
+4. Design and Build the GUI
+    - Create GUI layout: Develop a simple interface to display books, collections, and allow interaction (e.g., adding/removing books).
+    - Integrate with core functionality: Ensure that the GUI interacts with the core code (e.g., `Library` and `Storage` classes) to save/load data dynamically.
+
+5. Testing and Refinement
+    - Test the saving/loading functionality: Ensure that the books are being correctly saved and loaded from both JSON and database formats.
+    - Test GUI functionality: Make sure the GUI correctly updates the list of books and interacts properly with the backend logic.
+    - Refine the codebase: Optimize and refactor the code for maintainability and scalability.
