@@ -35,19 +35,18 @@ class Book:
         return f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}"
 
     # TODO: Create function to serialise and deserialize a book object
-    def to_dict(self):  # creates the book in dictionary form
+    def to_dict(self):  # creates the book in dictionary form as it can convert to json easily
         return {
             "title": self.title,
             "author": self.author,
             "year": self.year
         }
 
-    def book_to_json(self):
+    def book_to_json_string(self): # makes a string representation o a json object
         return json.dumps(self.to_dict())
 
     @staticmethod
-    def book_from_json(json_string):
-        book_dict = json.loads(json_string)
+    def book_from_dict(book_dict: dict):
         return Book(book_dict['title'], book_dict['author'], book_dict['year'])
 
 
