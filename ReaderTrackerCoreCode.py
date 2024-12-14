@@ -89,6 +89,7 @@ class BookCollection:
 # class Library:
 # def __int__(self):
 # load up GUI
+# let user pick user or create one ( when created forms them a json folder or add to database)
 # let user see collections to view
 # let user click collections and books to mark as read
 # load collections
