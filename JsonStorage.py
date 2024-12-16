@@ -3,7 +3,7 @@ import json
 import os.path
 from abc import ABC
 
-from ReaderTrackerCoreCode import Book
+from ReaderTrackerCoreCode import Book, BookCollection
 from Storage import Storage
 
 
@@ -61,26 +61,49 @@ class JsonStorage(Storage, ABC):
                     with open(collection_path, 'w') as f:
                         json.dump(collection_data, f)
 
-    def add_collection_to_storage(self, collection: list, user_id: str):
-        """
-        Adds a collection of books to the storage for a specific user.
-        """
-        pass
+    def add_collection_to_storage(self, collection: list, user_id: str, collection_name: str):
+        user_folder = self.get_user_folder(user_id)
+        collection_path = os.path.join(user_folder, f"{collection_name}.json")
 
-    def remove_collection_from_storage(self, collection: list, user_id: str):
-        """
-        Removes a collection of books from the storage for a specific user.
-        """
-        pass
+        # Create or update the collection
+        with open(collection_path, 'w') as f:
+            json.dump([book.to_dict() for book in collection], f, indent=4)
+
+    def remove_collection_from_storage(self, collection_name: str, user_id: str):
+        user_folder = self.get_user_folder(user_id)
+        collection_file = f"{collection_name}.json"
+        collection_path = os.path.join(user_folder, collection_file)
+
+        if os.path.exists(collection_path):
+            os.remove(collection_path)
 
     def add_user_to_storage(self, user_id: str):
+        self.get_user_folder(user_id)  # Ensure the user's folder is created
+
+    def remove_user_from_storage(self, user_id: str):
+        user_folder = self.get_user_folder(user_id)
+
+        if os.path.exists(user_folder):
+            for file in os.listdir(user_folder):
+                file_path = os.path.join(user_folder, file)
+                os.remove(file_path)
+            os.rmdir(user_folder)
+
+    def load_collection_from_storage(self, user_id: str, collection_name: str) -> BookCollection:
         """
-        Adds a new user to the storage system.
+        Loads a collection of books from the file
         """
         pass
 
-    def remove_user_from_storage(self, user_id: str):
+    def load_all_collections_from_storage(self, user_id: str) -> list:
         """
-        Removes a user from the storage system.
+        Loads all collections for a specific user from storage.
+        Returns a dictionary where the keys are collection names and the values are lists of Book objects.
+        """
+        pass
+
+    def get_list_of_collection_names(self, user_id: str) -> list:
+        """
+        Get list of collections so the user can pick
         """
         pass

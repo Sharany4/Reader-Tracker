@@ -46,7 +46,7 @@ class Book:
         return json.dumps(self.to_dict())
 
     @staticmethod
-    def book_from_dict(book_dict: dict):
+    def from_dict(book_dict: dict):
         return Book(book_dict['title'], book_dict['author'], book_dict['year'])
 
 

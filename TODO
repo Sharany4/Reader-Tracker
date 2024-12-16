@@ -3,6 +3,7 @@ To-Do List for Reader Tracker Project
 1. Define and Implement Storage System (SO can easily extend to database in the future)
     - Create a `Storage` class: Implement a base class that outlines the interface for saving and loading data.
     - Implement JSON Storage: Create a `JSONStorage` class that handles the reading and writing of book data to JSON files.
+    - Test core functionality ofthe JSON storage. (saving book or collection is correct, updates handled correctly, edges, handling corrupt files, )
     - Ensure Flexibility for Storage Type: Allow the system to smoothly transition between storage formats (JSON and Database) without affecting core functionalities.
 
 2. Update Core Code
