@@ -25,7 +25,7 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    def add_collection_to_storage(self, collection: list, user_id: str, collection_name: str):
+    def add_collection_to_storage(self, collection: BookCollection, user_id: str):
         """
         Adds a collection of books to the storage for a specific user.
         """
@@ -56,14 +56,6 @@ class Storage(ABC):
     def load_collection_from_storage(self, user_id: str, collection_name: str) -> BookCollection:
         """
         Loads a collection of books from the file
-        """
-        pass
-
-    @abstractmethod
-    def load_all_collections_from_storage(self, user_id: str) -> list:
-        """
-        Loads all collections for a specific user from storage.
-        Returns a dictionary where the keys are collection names and the values are lists of Book objects.
         """
         pass
 

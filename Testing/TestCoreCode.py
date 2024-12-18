@@ -41,9 +41,9 @@ class TestBookCollection(unittest.TestCase):
     def test_can_create_a_collection(self):
         book_coll = BookCollection()
 
-    def test_collection_takes_no_args(self):
-        with self.assertRaises(TypeError):
-            test_coll = BookCollection(TestBookCollection.test_book)
+    # def test_collection_takes_no_args(self): #No relevant anymore as it can take in the name
+    #   with self.assertRaises(TypeError):
+    #      test_coll = BookCollection(TestBookCollection.test_book)
 
     # Test the add method works correctly
     def test_coll_can_add_books(self):
@@ -138,6 +138,8 @@ class TestBookCollection(unittest.TestCase):
         test_coll.add_book(test_book_same_auth_sec)
         test_coll.add_book(test_book_same_auth_first)
         self.assertEqual(test_coll.books, correct_order_title_123)
+
+    # TODO: Test that when a book is added to the collection, the collection is added to its list
 
 
 if __name__ == '__main__':
