@@ -20,14 +20,10 @@ class Book:
         self.year = year
         self.collections = []
 
-    # TODO add function that notes a book is read(removes from collections and adds to the read list)
-    # To be finished once JSON saving is implemented
-    # pass through storage object to be read
-    def note_book_as_read(self):  # if I do this, will it actually remove the book from the collections?
-        # add book to json of completed books
-        for coll in self.collections:
+    def note_book_as_read(self, storage, user_id: str):
+        for coll in self.collections:  # remove book from all collections
             coll.remove_book(self)
-            # add to the read list
+        storage.add_book_to_storage(self, user_id, "read")  # add book to read list
 
     def add_collection(self, coll: "BookCollection"):
         self.collections.append(coll)
@@ -38,7 +34,6 @@ class Book:
     def get_book_details(self):
         return f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}"
 
-    # TODO: Create function to serialise and deserialize a book object
     def to_dict(self):  # creates the book in dictionary form as it can convert to json easily
         return {
             "title": self.title,
@@ -46,19 +41,18 @@ class Book:
             "year": self.year
         }
 
-    def book_to_json_string(self):  # makes a string representation o a json object
-        return json.dumps(self.to_dict())
-
     @staticmethod
     def from_dict(book_dict: dict):
         return Book(book_dict['title'], book_dict['author'], book_dict['year'])
+
+    def book_to_json_string(self):  # makes a string representation o a json object
+        return json.dumps(self.to_dict())
 
 
 # This class will represent a collection of books.
 # It will provide functionality to add and remove books, and sort them
 # how the user customizes.
 # Will need to figure out how to book books from one collection to another ones read
-
 """
 I am slowly integrating the storage into the code. I am leaving the previous code to save testing.
 Once storage in all integrated, will retest core code to make sure it works correctly
@@ -100,10 +94,12 @@ class BookCollection:
             raise DuplicateError(f" Book {book} is already in the collection")
         self.books.append(book)
         book.add_collection(self)  # TODO: test this occurs
-        self.books.sort(key=lambda x: (x.author, x.title))  # Sorts the books everytime another book is added
+        self.sort_books()
 
     # TODO: write the storage add book method
-    # def add_book_with_storage(self, book: Book):
+    def add_book_with_storage(self, book: Book, storage, user_id: str):
+        self.add_book(book)
+        storage.add_book_to_storage(book, user_id, self.name)
 
     def remove_book(self, book: Book):
         if not isinstance(book, Book):
@@ -111,18 +107,19 @@ class BookCollection:
         if book not in self.books:
             raise ValueError("The book is not in the collection")
         self.books.remove(book)
+        self.sort_books()
         book.remove_collection(self)
 
-    # TODO: write the storage remove book method
-    # def remove_book_with_storage(self, book: Book)
+    def remove_book_with_storage(self, book: Book, storage, user_id: str):
+        self.remove_book(book)
+        storage.remove_book_from_storage(book, user_id, self.name)
 
     def print_collection(self):
         for b in self.books:
             print(b.get_book_details())
 
-    # TODO: Create method to serialise and deserialise a collection object
-    # It will pas through the storage type and call that function
-    # No need to ad da specific serialise method for collection as it just saved books and name
+    def sort_books(self):
+        self.books.sort(key=lambda x: (x.author, x.title))  # Sorts the books everytime another book is added
 
 
 # TODO: create library class

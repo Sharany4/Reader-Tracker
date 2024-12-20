@@ -11,7 +11,7 @@ from ReaderTrackerCoreCode import Book, BookCollection
 # project is finished, I will focus on incorporating databases.
 class Storage(ABC):
     @abstractmethod
-    def add_book_to_storage(self, book: Book, user_id: str):
+    def add_book_to_storage(self, book: Book, user_id: str, collection="books"):
         """
         Adds a book to the storage for a specific user.
         """
@@ -42,6 +42,7 @@ class Storage(ABC):
     def add_user_to_storage(self, user_id: str):
         """
         Adds a new user to the storage system.
+        Adds books file and read books file for the user
         """
         pass
 

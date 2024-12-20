@@ -19,7 +19,8 @@ class JsonStorage(Storage, ABC):
             os.makedirs(user_folder)
         return user_folder
 
-    def add_book_to_storage(self, book: Book, user_id: str, collection="books"): # May be redundant as all books are in collections
+    def add_book_to_storage(self, book: Book, user_id: str,
+                            collection="books"):  # May be redundant as all books are in collections
         user_folder = self.get_user_folder(user_id)
         collection_path = os.path.join(user_folder, f"{collection}.json")
 
@@ -37,7 +38,8 @@ class JsonStorage(Storage, ABC):
             with open(collection_path, 'w') as f:
                 json.dump(collection_data, f)
 
-    def remove_book_from_storage(self, book: Book, user_id: str, collection='books', remove_from_all_collections=False): # Will be useful
+    def remove_book_from_storage(self, book: Book, user_id: str, collection='books',
+                                 remove_from_all_collections=False):  # Will be useful
         user_folder = self.get_user_folder(user_id)
 
         # Get all JSON files in the user's folder (assuming collections are stored as JSON files)
@@ -87,6 +89,7 @@ class JsonStorage(Storage, ABC):
 
     def add_user_to_storage(self, user_id: str):
         self.get_user_folder(user_id)  # Ensure the user's folder is created
+        # TODO: add books file and read books file for the user
 
     def remove_user_from_storage(self, user_id: str):
         user_folder = self.get_user_folder(user_id)
@@ -122,7 +125,7 @@ class JsonStorage(Storage, ABC):
             return None
 
     def get_list_of_collection_names(self, user_id: str) -> list:
-        """
-        Get list of collections so the user can pick
-        """
-        pass
+        user_folder = self.get_user_folder(user_id)
+        collection_files = [f for f in os.listdir(user_folder) if f.endswith('.json')]
+        collection_names = [os.path.splitext(f)[0] for f in collection_files]
+        return collection_names
