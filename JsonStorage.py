@@ -68,31 +68,28 @@ class JsonStorage(Storage, ABC):
                 json.dump([], f)
 
         # load the collection data
-        with open(collection_path, 'r') as f:
-            collection_data = json.load(f)
+        try:
+            with open(collection_path, 'r') as f:
+                collection_data = json.load(f)
+        except json.JSONDecodeError:
+            collection_data = []
 
-        # Convert book dictionary to a tuple of sorted items for comparison
-        book_dict = book.to_dict()
-        book_tuple = tuple(sorted(book_dict.items()))
-        # todo: need to fix this need a way to compare if the book is already in the collection
+        # Ensure collection_data is a list of dictionaries
+        if not isinstance(collection_data, list):
+            raise ValueError("Collection data should be a list")
 
-        # Convert existing collection data to tuples for comparison
-        collection_data_tuples = [tuple(sorted(item.items())) for item in collection_data]
+        # Convert dictionaries to Book objects
+        collection_books = [Book.from_dict(item) for item in collection_data]
 
         # Check if the book is already in the collection
-        if book_tuple not in collection_data_tuples:
-            collection_data.append(book_dict)
+        if book not in collection_books:
+            collection_books.append(book)
+            # Convert Book objects back to dictionaries
+            collection_data = [b.to_dict() for b in collection_books]
             # Write the updated collection data back to the JSON file
             with open(collection_path, 'w') as f:
                 json.dump(collection_data, f)
 
-        # Check if the book is already in the collection
-        """ book_dict = book.to_dict()
-        if book_dict not in collection_data:
-            collection_data.append(book_dict)
-            with open(collection_path, 'w') as f:
-                json.dump(collection_data, f)
-                """
 
     def remove_book_from_storage(self, book: Book, user_id: str, collection='books',
                                  remove_from_all_collections=False):  # Will be useful

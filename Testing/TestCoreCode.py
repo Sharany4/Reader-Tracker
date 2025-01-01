@@ -37,6 +37,10 @@ class TestBookCollection(unittest.TestCase):
     correct_list_abc = [test_book_a, test_book_b, test_book_c]
     correct_list_ac = [test_book_a, test_book_c]
 
+    def setUp(self):
+        # Reset the collections attribute before each test
+        self.test_book.collections = []
+
     # Test that the constructor works correctly
     def test_can_create_a_collection(self):
         book_coll = BookCollection()
@@ -140,6 +144,17 @@ class TestBookCollection(unittest.TestCase):
         self.assertEqual(test_coll.books, correct_order_title_123)
 
     # TODO: Test that when a book is added to the collection, the collection is added to its list
+    def test_collection_name_added_to_book(self):
+        test_coll = BookCollection("Test Collection")
+        test_coll.add_book(TestBookCollection.test_book)
+        self.assertEqual(TestBookCollection.test_book.collections, [test_coll])
+
+    def test_collection_name_removed_from_book(self):
+        test_coll = BookCollection("Test Collection")
+        test_coll.add_book(TestBookCollection.test_book)
+        self.assertEqual(TestBookCollection.test_book.collections, [test_coll])
+        test_coll.remove_book(TestBookCollection.test_book)
+        self.assertEqual(TestBookCollection.test_book.collections, [])
 
 
 if __name__ == '__main__':
