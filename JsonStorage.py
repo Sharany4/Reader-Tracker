@@ -42,6 +42,9 @@ class JsonStorage(Storage, ABC):
         with open(books_file, 'w') as f:
             json.dump([], f)  # Initialize with an empty list
 
+        # Create a JSON file for read books
+        self.add_collection_to_storage(BookCollection("read"), user_id)
+
     def get_list_of_collection_names(self, user_id: str) -> list:
         user_folder = self.get_user_folder(user_id)
         collection_files = [f for f in os.listdir(user_folder) if f.endswith('.json')]
@@ -89,7 +92,6 @@ class JsonStorage(Storage, ABC):
             # Write the updated collection data back to the JSON file
             with open(collection_path, 'w') as f:
                 json.dump(collection_data, f)
-
 
     def remove_book_from_storage(self, book: Book, user_id: str, collection='books',
                                  remove_from_all_collections=False):  # Will be useful
@@ -149,7 +151,7 @@ class JsonStorage(Storage, ABC):
                 collection_data = json.load(f)
 
             # Create a new BookCollection object
-            collection = BookCollection(collection_name=collection_data["name"])
+            collection = BookCollection(collection_data["name"])
 
             # Add each book back into the collection
             for book_data in collection_data["books"]:
@@ -158,8 +160,6 @@ class JsonStorage(Storage, ABC):
 
             return collection
         except IOError as e:
-            print(f"Error loading collection '{collection_name}' from storage: {e}")
-            return None
+            raise IOError(f"Error loading collection '{collection_name}' from storage: {e}")
         except json.JSONDecodeError as e:
-            print(f"Error decoding JSON for collection '{collection_name}': {e}")
-            return None
+            raise ValueError(f"Error decoding JSON for collection '{collection_name}': {e}")

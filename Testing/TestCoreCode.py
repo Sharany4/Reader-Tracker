@@ -143,7 +143,6 @@ class TestBookCollection(unittest.TestCase):
         test_coll.add_book(test_book_same_auth_first)
         self.assertEqual(test_coll.books, correct_order_title_123)
 
-    # TODO: Test that when a book is added to the collection, the collection is added to its list
     def test_collection_name_added_to_book(self):
         test_coll = BookCollection("Test Collection")
         test_coll.add_book(TestBookCollection.test_book)
