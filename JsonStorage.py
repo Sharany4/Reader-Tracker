@@ -40,10 +40,12 @@ class JsonStorage(Storage, ABC):
         # Create a JSON file for books
         books_file = os.path.join(user_folder, 'books.json')
         with open(books_file, 'w') as f:
-            json.dump([], f)  # Initialize with an empty list
+            json.dump({"name": "books", "books": []}, f)  # Initialize with the correct format
 
         # Create a JSON file for read books
-        self.add_collection_to_storage(BookCollection("read"), user_id)
+        read_file = os.path.join(user_folder, 'read.json')
+        with open(read_file, 'w') as f:
+            json.dump({"name": "read", "books": []}, f)  # Initialize with the correct format
 
     def get_list_of_collection_names(self, user_id: str) -> list:
         user_folder = self.get_user_folder(user_id)
@@ -61,62 +63,81 @@ class JsonStorage(Storage, ABC):
             os.rmdir(user_folder)
 
     def add_book_to_storage(self, book: Book, user_id: str,
-                            collection="books"):  # May be redundant as all books are in collections
+                            collection_name="books"):  # May be redundant as all books are in collections
         user_folder = self.get_user_folder(user_id)
-        collection_path = os.path.join(user_folder, f"{collection}.json")
+        collection_path = os.path.join(user_folder, f"{collection_name}.json")
 
         # create the collection if it doesn't exist
         if not os.path.exists(collection_path):
             with open(collection_path, 'w') as f:
-                json.dump([], f)
+                json.dump({"name": collection_name, "books": []}, f)
 
         # load the collection data
         try:
             with open(collection_path, 'r') as f:
                 collection_data = json.load(f)
-        except json.JSONDecodeError:
-            collection_data = []
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Error decoding JSON for collection '{collection_name}': {e}")
+
 
         # Ensure collection_data is a list of dictionaries
-        if not isinstance(collection_data, list):
-            raise ValueError("Collection data should be a list")
-
-        # Convert dictionaries to Book objects
-        collection_books = [Book.from_dict(item) for item in collection_data]
+        if not isinstance(collection_data["books"], list):
+             raise ValueError("Collection data should be a list, the type is: " + str(type(collection_data["books"])))
 
         # Check if the book is already in the collection
-        if book not in collection_books:
-            collection_books.append(book)
-            # Convert Book objects back to dictionaries
-            collection_data = [b.to_dict() for b in collection_books]
-            # Write the updated collection data back to the JSON file
+        if book.to_dict() not in collection_data["books"]:
+            collection_data["books"].append(book.to_dict())
             with open(collection_path, 'w') as f:
-                json.dump(collection_data, f)
+                json.dump(collection_data, f, indent=4)
 
-    def remove_book_from_storage(self, book: Book, user_id: str, collection='books',
+
+    def remove_book_from_storage(self, book: Book, user_id: str, collection_name='books',
                                  remove_from_all_collections=False):  # Will be useful
         user_folder = self.get_user_folder(user_id)
+        collection_path = os.path.join(user_folder, f"{collection_name}.json")
 
-        # Get all JSON files in the user's folder (assuming collections are stored as JSON files)
-        collection_files = [f for f in os.listdir(user_folder) if f.endswith('.json')]
+        # Check if the collection exists
+        if not os.path.exists(collection_path):
+            raise FileNotFoundError(f"Collection '{collection_name}' does not exist for user '{user_id}'")
 
-        # If remove_from_all_collections is True, process all collection files
-        if remove_from_all_collections:
-            collections = collection_files
-        else:
-            collections = [f"{collection}.json"]  # Only the specified collection
+        # Extract the book data from the collection
+        try:
+            with open(collection_path, 'r') as f:
+                collection_data = json.load(f)
 
-        for collection in collections:
-            collection_path = os.path.join(user_folder, collection)
-            if os.path.exists(collection_path):
-                with open(collection_path, 'r') as f:
-                    collection_data = json.load(f)
+            # Ensure collection_data is a dictionary with a "books" key
 
-                book_dict = book.to_dict()
-                if book_dict in collection_data:
-                    collection_data.remove(book_dict)
-                    with open(collection_path, 'w') as f:
-                        json.dump(collection_data, f)
+            if not isinstance(collection_data, dict) or "books" not in collection_data:
+                raise ValueError("Collection data should be a dictionary with a 'books' key")
+
+            # Remove the book from the collection
+            book_dict = book.to_dict()
+            if book_dict in collection_data["books"]:
+                collection_data["books"].remove(book_dict)
+
+            # Write the updated collection data back to the JSON file
+            with open(collection_path, 'w') as f:
+                json.dump(collection_data, f, indent=4)
+
+            # Remove the book from all collections if specified
+            if remove_from_all_collections:
+                for collection_file in os.listdir(user_folder):
+                    if collection_file.endswith('.json') and collection_file != f"{collection_name}.json":
+                        collection_path = os.path.join(user_folder, collection_file)
+                        with open(collection_path, 'r') as f:
+                            collection_data = json.load(f)
+
+                        if isinstance(collection_data, dict) and "books" in collection_data:
+                            if book_dict in collection_data["books"]:
+                                collection_data["books"].remove(book_dict)
+
+                            with open(collection_path, 'w') as f:
+                                json.dump(collection_data, f, indent=4)
+
+        except IOError as e:
+            raise IOError(f"Error removing book from collection '{collection_name}' for user '{user_id}': {e}")
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Error decoding JSON for collection '{collection_name}': {e}")
 
     def add_collection_to_storage(self, collection: BookCollection, user_id: str):
         user_folder = self.get_user_folder(user_id)
@@ -132,7 +153,7 @@ class JsonStorage(Storage, ABC):
                 }
                 json.dump(collection_data, f, indent=4)
         except IOError as e:
-            print(f"Error saving collection '{collection.name}' to storage: {e}")
+            raise IOError(f"Error saving collection '{collection.name}' to storage: {e}")
 
     def remove_collection_from_storage(self, collection_name: str, user_id: str):
         user_folder = self.get_user_folder(user_id)

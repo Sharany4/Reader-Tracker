@@ -23,6 +23,7 @@ class Book:
     def note_book_as_read(self, storage, user_id: str):
         for coll in self.collections:  # remove book from all collections
             coll.remove_book(self)
+        storage.remove_book_from_storage(self, user_id, remove_from_all_collections=True)
         storage.add_book_to_storage(self, user_id, "read")  # add book to read list
 
     def add_collection(self, coll: "BookCollection"):
