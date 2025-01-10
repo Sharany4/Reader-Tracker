@@ -14,7 +14,9 @@ class TestingJSON(unittest.TestCase):
     def setUp(self):
         # Create a temporary folder for testing
         self.test_folder = 'test_folder'
-        os.makedirs(self.test_folder, exist_ok=True)
+        if os.path.exists(self.test_folder):
+            shutil.rmtree(self.test_folder)
+        os.makedirs(self.test_folder)
 
         # Initialize the JSON storage with the test folder
         self.storage = JsonStorage(self.test_folder)
@@ -36,15 +38,18 @@ class TestingJSON(unittest.TestCase):
     def test_can_create_json_storage(self):
         test_storage = JsonStorage("test_folder")
 
-    def test_can_create_a_user_with_correct_initial_files(self):
-        # Check that the user folder was created
-        self.assertTrue(os.path.exists(os.path.join(self.test_folder, "test_user")))
+    def test_json_storage_has_correct_files(self):
+        # Check that the users file was created
+        self.assertTrue(os.path.exists(os.path.join(self.test_folder, "users.json")))
 
-        # Check that the collections file was created
-        self.assertTrue(os.path.exists(os.path.join(self.test_folder, "test_user", "collections.json")))
 
-        # Check that the books file was created
-        self.assertTrue(os.path.exists(os.path.join(self.test_folder, "test_user", "books.json")))
+    def test_getting_user_folder_with_invalid_username(self):
+        with self.assertRaises(FileNotFoundError):
+            self.storage.get_user_folder("non_existent_user")
+
+    def test_getting_user_folder_with_valid_username_returns_path(self):
+        user_folder = self.storage.get_user_folder("test_user")
+        self.assertEqual(user_folder, os.path.join(self.test_folder, "test_user"))
 
     def test_can_add_a_book_to_storage(self):
         # seeing what was in it before
@@ -65,8 +70,44 @@ class TestingJSON(unittest.TestCase):
         # Check that the book's details are in the books data
         self.assertIn(test_book.to_dict(), books_data_after["books"])
 
-    # TODO: test what happens with invalid username
+    def test_create_user_folder(self):
+        user_folder = self.storage.get_user_folder("test_user")
+        self.assertTrue(os.path.exists(user_folder))
 
+    # -------------------------------------------------------------
+    def test_create_user_folder_with_existing_folder_raises_error(self):
+        with self.assertRaises(FileExistsError):
+            self.storage.create_user_folder("test_user")
+
+    def test_create_user_folder_returns_correct_path(self):
+        user_folder = self.storage.create_user_folder("new_user")
+        self.assertEqual(user_folder, os.path.join(self.test_folder, "new_user"))
+
+    def test_add_user_to_storage_creates_user_folder(self):
+        self.storage.add_user_to_storage("new_user")
+        self.assertTrue(os.path.exists(os.path.join(self.test_folder, "new_user")))
+
+    def test_can_create_a_user_with_correct_initial_files(self):
+        # Check that the user folder was created
+        self.assertTrue(os.path.exists(os.path.join(self.test_folder, "test_user")))
+
+        # Check that the collections file was created
+        self.assertTrue(os.path.exists(os.path.join(self.test_folder, "test_user", "collections.json")))
+
+        # Check that the books file was created
+        self.assertTrue(os.path.exists(os.path.join(self.test_folder, "test_user", "books.json")))
+
+    def test_add_user_to_storage_raised_error_if_user_exists(self):
+        with self.assertRaises(FileExistsError):
+            self.storage.add_user_to_storage("test_user")
+
+    def test_add_user_to_storage_adds_user_to_users_file(self):
+        # Check that the user is in the users file
+        with open(os.path.join(self.test_folder, "users.json"), 'r') as f:
+            users_data = json.load(f)
+        self.assertIn("test_user", users_data["users"])
+
+    # -------------------------------------------------------------
     def test_can_remove_a_book_from_storage(self):
         user_books_path = os.path.join(self.test_folder, "test_user", "books.json")
 
@@ -166,18 +207,7 @@ class TestingJSON(unittest.TestCase):
         # Check that the book is not in the collection
         self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
 
-    # next tests written will handle the case of an invalid username being used
-
-    # TODO : Test that a read book is added to the read list ( will use a test json file)
-    # TODO : Test what happens if the book is invalid when serialising
-    # TODO : Test what happens if the book is invalid when deserialising
-    # TODO : Test when a book is removed, it the book removes the collection from its list
-    # TODO : Test that the collection is sorted correctly
-    # TODO : Test that the collection is sorted correctly after a book is removed
-    # TODO : Test that the collection is sorted correctly after a book is added
-    # TODO : test that json storage is open and closed, data persists
-
-    # Once the library is created, the user can add a collection to the library and will be tested here
+    # Tests to be done are written in the json storage file
 
 
 if __name__ == '__main__':
