@@ -260,7 +260,7 @@ class TestingJSON(unittest.TestCase):
             books_data = json.load(f)
         self.assertNotIn(test_book.to_dict(), books_data["books"])
 
-    #TODO: make sure test works still after testing add collection to storage
+    # TODO: make sure test works still after testing add collection to storage
     def test_remove_book_from_storage_can_remove_book_from_all_collections(self):
         # Create a collection and add a book to it
         test_collection = BookCollection("test_collection")
@@ -275,7 +275,7 @@ class TestingJSON(unittest.TestCase):
 
         # Add the book to the collection
         self.storage.add_book_to_storage(test_book, "test_user")  # adds to books.json
-        test_collection.add_book_with_storage(test_book, self.storage, "test_user") # adds to test_collection.json
+        test_collection.add_book_with_storage(test_book, self.storage, "test_user")  # adds to test_collection.json
 
         # Check that the book is in both collections
         loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
@@ -291,6 +291,7 @@ class TestingJSON(unittest.TestCase):
         self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
         loaded_book_collection = self.storage.load_collection_from_storage("test_user", "books")
         self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_book_collection.books])
+
     # -------------------------------------------------------------
 
     def test_can_add_a_collection_to_storage(self):
@@ -299,7 +300,7 @@ class TestingJSON(unittest.TestCase):
 
     def test_add_collection_to_storage_raises_error_if_collection_already_present(self):
         with self.assertRaises(FileExistsError):
-            self.storage.add_collection_to_storage(BookCollection("books"),"test_user")
+            self.storage.add_collection_to_storage(BookCollection("books"), "test_user")
 
     def test_add_collection_to_storage_raises_error_if_invalid_user(self):
         with self.assertRaises(FileNotFoundError):
@@ -413,10 +414,7 @@ class TestingJSON(unittest.TestCase):
             collections_data = json.load(f)
         self.assertNotIn("test_collection", collections_data["names"])
 
-
-    #-------------------------------------------------------------
-    # TODO: test what happens with invalid username
-
+    # -------------------------------------------------------------
     def test_can_load_a_collection_from_storage(self):
         test_collection = BookCollection("test_collection")
         test_book = Book("Fake title", "Fake author", 1000)
@@ -431,11 +429,13 @@ class TestingJSON(unittest.TestCase):
         self.assertEqual(loaded_collection.books[0].to_dict(), test_collection.books[0].to_dict())
 
     # TODO: test what happens with invalid username
+    def test_load_a_collection_from_storage_raises_error_if_invalid_user(self):
+        with self.assertRaises(FileNotFoundError):
+            self.storage.load_collection_from_storage("non_existent_user", "test_collection")
 
     def test_to_load_a_collection_not_present(self):
         with self.assertRaises(IOError):
             self.storage.load_collection_from_storage("test_user", "non_existent_collection")
-
     def test_json_decoder_error(self):
         # Create a file with invalid JSON data
         invalid_json_path = os.path.join(self.test_folder, "test_user", "invalid.json")
@@ -446,15 +446,109 @@ class TestingJSON(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.storage.load_collection_from_storage("test_user", "invalid")
 
-    # Needs to be fixed
+    def test_load_collection_from_storage_returns_correct_collection(self):
+        test_collection = BookCollection("test_collection")
+        test_book = Book("Fake title", "Fake author", 1000)
+        test_collection.add_book(test_book)
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+        user_books_collections = os.path.join(self.test_folder, "test_user", "books.json")
+        with open(user_books_collections, 'r') as f:
+            books_data = json.load(f)
+        self.assertIn(test_book.to_dict(), books_data["books"])
+
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+
+        self.assertEqual(loaded_collection.name, test_collection.name)
+        self.assertEqual(loaded_collection.books[0].to_dict(), test_collection.books[0].to_dict())
+
+    def test_load_collection_from_storage_returns_correct_collection_with_multiple_books(self):
+        test_collection = BookCollection("test_collection")
+        test_book_a = Book("Fake title", "Fake author", 1000)
+        test_book_b = Book("Fake title 2", "Fake author 2", 2000)
+        test_collection.add_book(test_book_a)
+        test_collection.add_book(test_book_b)
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+
+        self.assertEqual(loaded_collection.name, test_collection.name)
+        self.assertEqual(loaded_collection.books[0].to_dict(), test_collection.books[0].to_dict())
+        self.assertEqual(loaded_collection.books[1].to_dict(), test_collection.books[1].to_dict())
+
+    def test_load_collection_from_storage_returns_correct_collection_with_no_books(self):
+        test_collection = BookCollection("test_collection")
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+
+        self.assertEqual(loaded_collection.name, test_collection.name)
+        self.assertEqual(loaded_collection.books, test_collection.books)
+
+    def test_load_collection_from_stroage_throws_error_if_data_is_invalid(self):
+        # Create a file with invalid JSON data
+        invalid_json_path = os.path.join(self.test_folder, "test_user", "invalid.json")
+        with open(invalid_json_path, 'w') as f:
+            f.write("Invalid JSON data")
+
+        # Try to load the invalid JSON file
+        with self.assertRaises(ValueError):
+            self.storage.load_collection_from_storage("test_user", "invalid")
+
+    # -------------------------------------------------------------
+    def test_can_get_list_of_collection_names(self):
+        test_collection = BookCollection("test_collection")
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        collection_names = self.storage.get_list_of_collection_names("test_user")
+        self.assertIn("test_collection", collection_names)
+
+    def test_list_of_collection_names_gives_names_that_can_be_used_to_load_collections(self):
+        test_collection = BookCollection("test_collection")
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        collection_names = self.storage.get_list_of_collection_names("test_user")
+        self.assertIn("test_collection", collection_names)
+
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertEqual(loaded_collection.name, "test_collection")
+
+    def test_list_of_collection_names_gives_names_that_can_be_used_to_load_collections_with_multiple_collections(self):
+        test_collection_a = BookCollection("test_collection_a")
+        test_collection_b = BookCollection("test_collection_b")
+        self.storage.add_collection_to_storage(test_collection_a, "test_user")
+        self.storage.add_collection_to_storage(test_collection_b, "test_user")
+
+        collection_names = self.storage.get_list_of_collection_names("test_user")
+        self.assertIn("test_collection_a", collection_names)
+        self.assertIn("test_collection_b", collection_names)
+
+        loaded_collection_a = self.storage.load_collection_from_storage("test_user", "test_collection_a")
+        self.assertEqual(loaded_collection_a.name, "test_collection_a")
+
+        loaded_collection_b = self.storage.load_collection_from_storage("test_user", "test_collection_b")
+        self.assertEqual(loaded_collection_b.name, "test_collection_b")
+
+    def test_list_of_collection_names_gives_names_that_can_be_used_to_load_collections_with_books(self):
+        test_collection = BookCollection("test_collection")
+        test_book = Book("Fake title", "Fake author", 1000)
+        test_collection.add_book(test_book)
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        collection_names = self.storage.get_list_of_collection_names("test_user")
+        self.assertIn("test_collection", collection_names)
+
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertEqual(loaded_collection.name, "test_collection")
+        self.assertEqual(loaded_collection.books[0].to_dict(), test_book.to_dict())
+    # -------------------------------------------------------------
     def test_read_book_adds_to_read_and_removed_from_collections(self):
         # Create a collection and add a book to it
         test_collection = BookCollection("test_collection")
         test_book = Book("Fake title", "Fake author", 1000)
         test_collection.add_book(test_book)
 
-        # Add the collection to the storage
-        # self.storage.add_book_to_storage(test_book, "test_user") # don't have to do this anymore, taken care of in add collection to storage
+        # Add the collection to the storage self.storage.add_book_to_storage(test_book, "test_user") # don't have to
+        # do this anymore, taken care of in add collection to storage
         self.storage.add_collection_to_storage(test_collection, "test_user")
 
         # Test the book is in the collection

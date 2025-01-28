@@ -226,11 +226,6 @@ class JsonStorage(Storage, ABC):
         with open(users_collections_names_file, 'w') as f:
             json.dump(collection_names, f, indent=4)
 
-
-    # TODO: test that the collection is loaded correctly into a collection object
-    # TODO: test that error is raised if the collection does not exist
-    # TODO: test that error is raised if the JSON data is invalid
-    # TODO: test that the books are the same
     def load_collection_from_storage(self, user_id: str, collection_name: str) -> BookCollection:
         user_folder = self.get_user_folder(user_id)
         collection_path = os.path.join(user_folder, f"{collection_name}.json")
@@ -253,9 +248,6 @@ class JsonStorage(Storage, ABC):
         except json.JSONDecodeError as e:
             raise ValueError(f"Error decoding JSON for collection '{collection_name}': {e}")
 
-    # TODO: needs to be tested
-    # TODO: test that the names can be used to get collections from files
-    # TODO: if invalid user, raise an error
     def get_list_of_collection_names(self, user_id: str) -> list:
         user_folder = self.get_user_folder(user_id)
         collection_files = [f for f in os.listdir(user_folder) if f.endswith('.json')]
