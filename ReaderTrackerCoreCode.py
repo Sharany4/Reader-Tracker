@@ -1,5 +1,6 @@
 # In this file I am creating the core functionality for my project
 import json
+import tkinter as tk
 
 
 # My initial implementation will be to make the user
@@ -53,31 +54,6 @@ class Book:
 # This class will represent a collection of books.
 # It will provide functionality to add and remove books, and sort them
 # how the user customizes.
-# Will need to figure out how to book books from one collection to another ones read
-"""
-I am slowly integrating the storage into the code. I am leaving the previous code to save testing.
-Once storage in all integrated, will retest core code to make sure it works correctly
-
-Baseline Testing:
-
-Ensure all existing tests for the core functionality pass before making changes.
-
-Implement Storage Methods:
-Add the storage-enabled versions (add_book_with_storage, etc.).
-Write tests specifically for these methods, focusing on integration with storage.
-
-Re-test Core Functionality:
-Re-run your old tests to confirm that nothing has been unintentionally broken by the new additions.
-
-Refactor:
-Once you’re confident that the storage-enabled methods work perfectly, remove the older methods that no longer add value.
-
-Cleanup:
-Update any remaining tests or code that relied on the old methods.
-Ensure that your final codebase is streamlined, with no redundant functionality.
-"""
-
-
 class BookCollection:
     def __init__(self, name: str = None):
         if name is None:  # Handle the case where no name is provided
@@ -124,8 +100,33 @@ class BookCollection:
 
 # TODO: create library class
 # Library class works as the headmaster to manage collections and books
-# class Library:
-# def __int__(self):
+class Library:
+    def __init__(self, storage: "JsonStorage"):
+        self.storage = storage
+
+    def load_gui(self):
+        root = tk.Tk()  # create root widget
+
+        # Setting some window properties
+        root.title("Reader Tracker")
+        pink = "#f39ff5"
+        root.config(padx=100, pady=100, bg=pink)  # padding around the window
+        root.minsize(200, 200)  # minimum size of the window
+        root.maxsize(500, 500)  # maximum size of the window
+        root.geometry("1200x900+50+50")  # size and position of the window
+
+        # TODO: create list to let users pick a user or create one
+        # TODO: show list of collections of that user
+        # TODO: show list of books in that collection
+        # TODO: add collection
+        # TODO: delete collection
+        # TODO: add book to collection
+        # TODO: remove book from collection
+        # TODO: mark book as read
+
+        root.mainloop()  # runs the main event loop
+
+
 # load up GUI
 # let user pick user or create one ( when created forms them a json folder or add to database)
 # let user see collections to view

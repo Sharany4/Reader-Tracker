@@ -436,6 +436,7 @@ class TestingJSON(unittest.TestCase):
     def test_to_load_a_collection_not_present(self):
         with self.assertRaises(IOError):
             self.storage.load_collection_from_storage("test_user", "non_existent_collection")
+
     def test_json_decoder_error(self):
         # Create a file with invalid JSON data
         invalid_json_path = os.path.join(self.test_folder, "test_user", "invalid.json")
@@ -540,6 +541,7 @@ class TestingJSON(unittest.TestCase):
         loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
         self.assertEqual(loaded_collection.name, "test_collection")
         self.assertEqual(loaded_collection.books[0].to_dict(), test_book.to_dict())
+
     # -------------------------------------------------------------
     def test_read_book_adds_to_read_and_removed_from_collections(self):
         # Create a collection and add a book to it
@@ -570,7 +572,22 @@ class TestingJSON(unittest.TestCase):
         # Check that the book is not in the collection
         self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
 
-    # Tests to be done are written in the json storage file
+    # --------------------------------------------------------------
+    def test_that_if_new_json_storage_made_data_from_the_folder_persists(self):
+        # Create a new JSON storage
+        new_storage = JsonStorage(self.test_folder)
+
+        # Check that the user folder is present
+        user_folder = new_storage.get_user_folder("test_user")
+        self.assertTrue(os.path.exists(user_folder))
+
+        # Check that the collections file is present
+        collections_file = os.path.join(user_folder, "collections.json")
+        self.assertTrue(os.path.exists(collections_file))
+
+        # Check that the books file is present
+        books_file = os.path.join(user_folder, "books.json")
+        self.assertTrue(os.path.exists(books_file))
 
 
 if __name__ == '__main__':
