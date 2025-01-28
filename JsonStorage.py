@@ -120,7 +120,6 @@ class JsonStorage(Storage, ABC):
         with open(collection_path, 'w') as f:
             json.dump(collection_data, f, indent=4)
 
-    # TODO: test that the book is removed from all collections
     def remove_book_from_storage(self, book: Book, user_id: str, collection_name='books',
                                  remove_from_all_collections=False):  # Will be useful
         user_folder = self.get_user_folder(user_id)
@@ -146,7 +145,7 @@ class JsonStorage(Storage, ABC):
             # Remove the book from the collection
             book_dict = book.to_dict()
             if book_dict not in collection_data["books"]:
-                raise ValueError(f"Book '{book.title}' is not in the collection '{collection_name}'")
+                raise ValueError(f"Book '{book.title}' is not in the collection", collection_name)
             collection_data["books"].remove(book_dict)
 
             # Write the updated collection data back to the JSON file
@@ -173,9 +172,6 @@ class JsonStorage(Storage, ABC):
         except json.JSONDecodeError as e:
             raise ValueError(f"Error decoding JSON for collection '{collection_name}': {e}")
 
-    # todo: check that books can be added to the colleciton
-    # todo: that books can be remvoed from a collection
-    # todo: test that a book can be removed from all collections
     def add_collection_to_storage(self, collection: BookCollection, user_id: str):
         user_folder = self.get_user_folder(user_id)
         collection_path = os.path.join(user_folder, f"{collection.name}.json")
@@ -192,6 +188,14 @@ class JsonStorage(Storage, ABC):
         with open(users_collections_names_file, 'w') as f:
             json.dump(collection_names, f, indent=4)
 
+        # Add any missing books to storage
+        for book in collection.books:
+            try:
+                self.add_book_to_storage(book, user_id)
+            except ValueError:
+                # Book is already in storage, continue
+                pass
+
         # Serialize the collection and write it to the storage file
         try:
             with open(collection_path, 'w') as f:
@@ -204,18 +208,24 @@ class JsonStorage(Storage, ABC):
         except IOError as e:
             raise IOError(f"Error saving collection '{collection.name}' to storage: {e}")
 
-    # TODO: test that the collection is removed from the user folder
-    # todo: test that the collection is removed from the collections file
-    # todo: test that an error is raised if the collection does not exist
-    # todo: test that an error is raised if the user does not exist
-    # TODO: test that error is raised if the collection does not exist
     def remove_collection_from_storage(self, collection_name: str, user_id: str):
         user_folder = self.get_user_folder(user_id)
         collection_file = f"{collection_name}.json"
         collection_path = os.path.join(user_folder, collection_file)
 
-        if os.path.exists(collection_path):
-            os.remove(collection_path)
+        if not os.path.exists(collection_path):
+            raise FileNotFoundError(f"Collection '{collection_name}' does not exist for user '{user_id}'")
+
+        os.remove(collection_path)
+        users_collections_names_file = os.path.join(user_folder, 'collections.json')
+        with open(users_collections_names_file, 'r') as f:
+            collection_names = json.load(f)
+            if collection_name not in collection_names["names"]:
+                raise ValueError(f"Collection '{collection_name}' does not exist for user '{user_id}'")
+            collection_names["names"].remove(collection_name)
+        with open(users_collections_names_file, 'w') as f:
+            json.dump(collection_names, f, indent=4)
+
 
     # TODO: test that the collection is loaded correctly into a collection object
     # TODO: test that error is raised if the collection does not exist

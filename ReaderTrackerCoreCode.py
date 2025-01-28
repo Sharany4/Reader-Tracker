@@ -94,10 +94,9 @@ class BookCollection:
         if book in self.books:
             raise DuplicateError(f" Book {book} is already in the collection")
         self.books.append(book)
-        book.add_collection(self)  # TODO: test this occurs
+        book.add_collection(self)
         self.sort_books()
 
-    # TODO: write the storage add book method
     def add_book_with_storage(self, book: Book, storage, user_id: str):
         self.add_book(book)
         storage.add_book_to_storage(book, user_id, self.name)
@@ -135,7 +134,9 @@ class BookCollection:
 # add collection
 # delete collection
 # add book to this collection
+# add book in general to storage
 # remove book from this collection
+# remove book in general from storage
 
 
 # class for creating an exception when trying to add a duplicate

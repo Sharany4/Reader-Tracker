@@ -242,6 +242,55 @@ class TestingJSON(unittest.TestCase):
             self.storage.remove_book_from_storage(Book("Fake title", "Fake author", 1000), "test_user",
                                                   "non_existent_collection")
 
+    def test_remove_book_from_storage_removes_book_if_present(self):
+        user_books_path = os.path.join(self.test_folder, "test_user", "books.json")
+
+        test_book = Book("Fake title", "Fake author", 1000)
+        self.storage.add_book_to_storage(test_book, "test_user", "books")
+
+        # Read the contents of the user's books file
+        with open(user_books_path, 'r') as f:
+            books_data = json.load(f)
+        self.assertIn(test_book.to_dict(), books_data["books"])
+
+        # Remove the book from the storage
+        self.storage.remove_book_from_storage(test_book, "test_user")
+
+        with open(user_books_path, 'r') as f:
+            books_data = json.load(f)
+        self.assertNotIn(test_book.to_dict(), books_data["books"])
+
+    #TODO: make sure test works still after testing add collection to storage
+    def test_remove_book_from_storage_can_remove_book_from_all_collections(self):
+        # Create a collection and add a book to it
+        test_collection = BookCollection("test_collection")
+        test_book = Book("Fake title", "Fake author", 1000)
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        # Check that the book is not present in both collections
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
+        loaded_book_collection = self.storage.load_collection_from_storage("test_user", "books")
+        self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_book_collection.books])
+
+        # Add the book to the collection
+        self.storage.add_book_to_storage(test_book, "test_user")  # adds to books.json
+        test_collection.add_book_with_storage(test_book, self.storage, "test_user") # adds to test_collection.json
+
+        # Check that the book is in both collections
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
+        loaded_book_collection = self.storage.load_collection_from_storage("test_user", "books")
+        self.assertIn(test_book.to_dict(), [book.to_dict() for book in loaded_book_collection.books])
+
+        # Remove the book from the storage
+        self.storage.remove_book_from_storage(test_book, "test_user", "books", remove_from_all_collections=True)
+
+        # Check that the book is not in both collections
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
+        loaded_book_collection = self.storage.load_collection_from_storage("test_user", "books")
+        self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_book_collection.books])
     # -------------------------------------------------------------
 
     def test_can_add_a_collection_to_storage(self):
@@ -267,7 +316,71 @@ class TestingJSON(unittest.TestCase):
             collections_data = json.load(f)
         self.assertIn("test_collection", collections_data["names"])
 
-    # TODO: test what happens with invalid username
+    def test_add_collection_updates_if_books_are_added(self):
+        test_collection = BookCollection("test_collection")
+        test_book = Book("Fake title", "Fake author", 1000)
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+        # Cant call add book to storage if collection is not added to storage
+        test_collection.add_book_with_storage(test_book, self.storage, "test_user")
+
+        # Check that the book is in the collection
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
+
+    def test_add_collection_to_storage_will_add_books_already_in_collection(self):
+        test_collection = BookCollection("test_collection")
+        test_book = Book("Fake title", "Fake author", 1000)
+        test_collection.add_book(test_book)
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        # Check that the book is in the collection
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
+
+    def test_add_collection_will_update_if_books_are_removed(self):
+        test_collection = BookCollection("test_collection")
+        test_book = Book("Fake title", "Fake author", 1000)
+        test_collection.add_book(test_book)
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        # Check that the book is in the collection
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
+
+        # Remove the book from the collection
+        test_collection.remove_book_with_storage(test_book, self.storage, "test_user")
+
+        # Check that the book is not in the collection
+        loaded_collection = self.storage.load_collection_from_storage("test_user", "test_collection")
+        self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
+
+    def test_add_collection_to_storage_raises_error_if_invalid_collection_name(self):
+        with self.assertRaises(ValueError):
+            self.storage.add_collection_to_storage(BookCollection(""), "test_user")
+
+    def test_add_collection_to_storage_raises_error_if_invalid_username(self):
+        with self.assertRaises(FileNotFoundError):
+            self.storage.add_collection_to_storage(BookCollection("test_collection"), "non_existent_user")
+
+    def test_add_collection_to_storage_raises_error_if_collection_already_exists(self):
+        with self.assertRaises(FileExistsError):
+            self.storage.add_collection_to_storage(BookCollection("books"), "test_user")
+
+    def test_add_collection_to_storage_can_let_us_extract_the_data(self):
+        test_collection = BookCollection("test_collection")
+        test_book = Book("Fake title", "Fake author", 1000)
+
+        test_collection.add_book(test_book)
+        self.storage.add_collection_to_storage(test_collection, "test_user")
+
+        with open(os.path.join(self.test_folder, "test_user", "test_collection.json"), 'r') as f:
+            collection_data = json.load(f)
+        self.assertEqual(collection_data["name"], "test_collection")
+        self.assertEqual(collection_data["books"][0], test_book.to_dict())
+
+    def test_add_collection_throws_error_if_collection_name_empty(self):
+        with self.assertRaises(ValueError):
+            self.storage.add_collection_to_storage(BookCollection(""), "test_user")
 
     # -------------------------------------------------------------
 
@@ -280,6 +393,28 @@ class TestingJSON(unittest.TestCase):
         self.storage.remove_collection_from_storage("test_collection", "test_user")
         self.assertFalse(os.path.exists(collection_path))
 
+    def test_remove_collection_from_storage_raises_error_if_invalid_user(self):
+        with self.assertRaises(FileNotFoundError):
+            self.storage.remove_collection_from_storage("test_collection", "non_existent_user")
+
+    def test_remove_collection_from_storage_raises_error_if_invalid_collection(self):
+        with self.assertRaises(FileNotFoundError):
+            self.storage.remove_collection_from_storage("non_existent_collection", "test_user")
+
+    def test_remove_collection_from_storage_removes_collection_from_collections_file(self):
+        self.storage.add_collection_to_storage(BookCollection("test_collection"), "test_user")
+        with open(os.path.join(self.test_folder, "test_user", "collections.json"), 'r') as f:
+            collections_data = json.load(f)
+        self.assertIn("test_collection", collections_data["names"])
+
+        self.storage.remove_collection_from_storage("test_collection", "test_user")
+
+        with open(os.path.join(self.test_folder, "test_user", "collections.json"), 'r') as f:
+            collections_data = json.load(f)
+        self.assertNotIn("test_collection", collections_data["names"])
+
+
+    #-------------------------------------------------------------
     # TODO: test what happens with invalid username
 
     def test_can_load_a_collection_from_storage(self):
@@ -312,13 +447,14 @@ class TestingJSON(unittest.TestCase):
             self.storage.load_collection_from_storage("test_user", "invalid")
 
     # Needs to be fixed
-    '''def test_read_book_adds_to_read_and_removed_from_collections(self):
+    def test_read_book_adds_to_read_and_removed_from_collections(self):
         # Create a collection and add a book to it
         test_collection = BookCollection("test_collection")
         test_book = Book("Fake title", "Fake author", 1000)
         test_collection.add_book(test_book)
 
         # Add the collection to the storage
+        # self.storage.add_book_to_storage(test_book, "test_user") # don't have to do this anymore, taken care of in add collection to storage
         self.storage.add_collection_to_storage(test_collection, "test_user")
 
         # Test the book is in the collection
@@ -338,7 +474,7 @@ class TestingJSON(unittest.TestCase):
         self.assertIn(test_book.to_dict(), [book.to_dict() for book in loaded_read_books.books])
 
         # Check that the book is not in the collection
-        self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])'''
+        self.assertNotIn(test_book.to_dict(), [book.to_dict() for book in loaded_collection.books])
 
     # Tests to be done are written in the json storage file
 
