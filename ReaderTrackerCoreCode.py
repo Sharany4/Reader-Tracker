@@ -104,6 +104,8 @@ class BookCollection:
 class Library:
     def __init__(self, storage: "JsonStorage"):
         self.storage = storage
+        self.current_user = None
+        self.selected_user_label = None
 
     def load_gui(self):
         root = tk.Tk()  # create root widget
@@ -121,7 +123,7 @@ class Library:
         pick_base_folder_button = tk.Button(root, text="Pick Base Folder")
         pick_base_folder_button.place(x=0, y=0)
 
-        # let them add a user
+        # let them add or remove a user
         # Button to open the "add user" dialog
         add_user_button = tk.Button(root, text="Add User", command=self.open_add_user_dialog)
         add_user_button.place(x=0, y=30)
@@ -129,7 +131,34 @@ class Library:
         remove_user_button = tk.Button(root, text="Remove User", command=self.open_remove_user_dialog)
         remove_user_button.place(x=70, y=30)
 
-        # TODO: create list to let users pick a user or create one
+        # let them pick a user
+        pick_user_button = tk.Button(root, text="Pick User", command=self.open_pick_user_dialog)
+        pick_user_button.place(x=0, y=100)
+
+        # label to show user
+        # Label to display the selected user
+        self.selected_user_label = tk.Label(root, text=f"Selected User: {self.current_user}")
+        self.selected_user_label.place(x=90, y=100)
+
+        # let them add a collection
+        add_collection_button = tk.Button(root, text="Add Collection")
+        add_collection_button.place(x=0, y=130)
+
+        # let them remove a collection
+        remove_collection_button = tk.Button(root, text="Remove Collection")
+        remove_collection_button.place(x=0, y=160)
+
+        # let them add a book to a collection
+        add_book_to_collection_button = tk.Button(root, text="Add Book to Collection")
+        add_book_to_collection_button.place(x=0, y=190)
+
+        # let them remove a book from a collection
+        remove_book_from_collection_button = tk.Button(root, text="Remove Book from Collection")
+        remove_book_from_collection_button.place(x=0, y=220)
+
+
+
+
         # TODO: show list of collections of that user
         # TODO: show list of books in that collection
         # TODO: add collection
@@ -211,6 +240,43 @@ class Library:
 
         remove_button = tk.Button(remove_user_window, text="Remove User", command=on_remove_user)
         remove_button.pack()
+
+    def open_pick_user_dialog(self):
+        # Create a new window for the dialog
+        pick_user_window = tk.Toplevel()
+        pick_user_window.title("Pick User")
+
+        # Load the list of users from the users.json file
+        user_list = self.storage.get_user_list()
+
+        if not user_list:
+            messagebox.showerror("No Users", "There are no users to pick.")
+            pick_user_window.destroy()
+            return
+
+        # Create a label for the dropdown menu
+        user_label = tk.Label(pick_user_window, text="Select a user:")
+        user_label.pack(padx=10, pady=5)
+
+        # Create a dropdown menu for the user list
+        user_var = tk.StringVar(pick_user_window)
+        user_var.set(user_list[0])
+        user_dropdown = tk.OptionMenu(pick_user_window, user_var, *user_list)
+        user_dropdown.pack(padx=10, pady=5)
+
+        # create the remove user button
+        def on_pick_user():
+            user_name = user_var.get()
+            if not user_name:  # if it is entered
+                messagebox.showerror("Input Error", "Please enter a user name")
+
+            self.current_user = user_name
+            self.selected_user_label.config(text=f"Selected User: {self.current_user}")
+            messagebox.showinfo("User Picked", f"User '{user_name}' has been picked successfully.")
+            pick_user_window.destroy()
+
+        pick_button = tk.Button(pick_user_window, text="Pick User", command=on_pick_user)
+        pick_button.pack()
 
 
 # load up GUI
