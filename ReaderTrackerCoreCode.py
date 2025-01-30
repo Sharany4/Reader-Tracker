@@ -1,6 +1,7 @@
 # In this file I am creating the core functionality for my project
 import json
 import tkinter as tk
+from tkinter import messagebox
 
 
 # My initial implementation will be to make the user
@@ -110,10 +111,23 @@ class Library:
         # Setting some window properties
         root.title("Reader Tracker")
         pink = "#f39ff5"
-        root.config(padx=100, pady=100, bg=pink)  # padding around the window
+        root.config(padx=20, pady=20, bg=pink)  # padding around the window
         root.minsize(200, 200)  # minimum size of the window
         root.maxsize(500, 500)  # maximum size of the window
-        root.geometry("1200x900+50+50")  # size and position of the window
+        root.geometry("1200x900")  # size and position of the window
+
+        # Let them pick base folder
+        # TODO: create a button to let them pick a base folder
+        pick_base_folder_button = tk.Button(root, text="Pick Base Folder")
+        pick_base_folder_button.place(x=0, y=0)
+
+        # let them add a user
+        # Button to open the "add user" dialog
+        add_user_button = tk.Button(root, text="Add User", command=self.open_add_user_dialog)
+        add_user_button.place(x=0, y=30)
+
+        remove_user_button = tk.Button(root, text="Remove User", command=self.open_remove_user_dialog)
+        remove_user_button.place(x=70, y=30)
 
         # TODO: create list to let users pick a user or create one
         # TODO: show list of collections of that user
@@ -125,6 +139,78 @@ class Library:
         # TODO: mark book as read
 
         root.mainloop()  # runs the main event loop
+
+    def open_add_user_dialog(self):
+        # Create a new window for the dialog
+        add_user_window = tk.Toplevel()
+        add_user_window.title("Add User")
+
+        # Create a entry for the username
+        user_label = tk.Label(add_user_window, text="User username:")
+        user_label.pack(padx=10, pady=5)
+        user_entry = tk.Entry(add_user_window)
+
+        # Create an entry for the user ID
+        user_id_entry = tk.Entry(add_user_window)
+        user_id_entry.pack(padx=10, pady=5)
+
+        # create the add user button
+        def on_add_user():
+            user_name = user_id_entry.get()
+            if not user_name:  # if it is entered
+                messagebox.showerror("Input Error", "Please enter a user name")
+                return
+
+            try:
+                self.storage.add_user_to_storage(user_name)
+                messagebox.showinfo("User Added", f"User '{user_name}' has been added successfully.")
+                print("added the user to storage")
+                add_user_window.destroy()
+            except FileExistsError:
+                messagebox.showerror("User Exists", f"User '{user_name}' already exists.")
+
+        add_button = tk.Button(add_user_window, text="Add User", command=on_add_user)
+        add_button.pack()
+
+    def open_remove_user_dialog(self):
+        # Create a new window for the dialog
+        remove_user_window = tk.Toplevel()
+        remove_user_window.title("Remove User")
+
+        # Load the list of users from the users.json file
+        user_list = self.storage.get_user_list()
+
+        if not user_list:
+            messagebox.showerror("No Users", "There are no users to remove.")
+            remove_user_window.destroy()
+            return
+
+        # Create a label for the dropdown menu
+        user_label = tk.Label(remove_user_window, text="Select a user to remove:")
+        user_label.pack(padx=10, pady=5)
+
+        # Create a dropdown menu for the user list
+        user_var = tk.StringVar(remove_user_window)
+        user_var.set(user_list[0])  # default is the first user
+        user_dropdown = tk.OptionMenu(remove_user_window, user_var, *user_list)
+        user_dropdown.pack(padx=10, pady=5)
+
+        # create the remove user button
+        def on_remove_user():
+            user_name = user_var.get()
+            if not user_name:  # if it is entered
+                messagebox.showerror("Input Error", "Please enter a user name")
+
+            try:
+                self.storage.remove_user_from_storage(user_name)
+                messagebox.showinfo("User Removed", f"User '{user_name}' has been removed successfully.")
+                print("removed the user to storage")
+                remove_user_window.destroy()
+            except FileNotFoundError:
+                messagebox.showerror("User Not Found", f"User '{user_name}' does not exist.")
+
+        remove_button = tk.Button(remove_user_window, text="Remove User", command=on_remove_user)
+        remove_button.pack()
 
 
 # load up GUI

@@ -26,6 +26,11 @@ class JsonStorage(Storage, ABC):
             with open(self.users_file, 'w') as f:
                 json.dump({"users": []}, f)
 
+    def get_user_list(self):
+        with open(self.users_file, 'r') as f:
+            users_data = json.load(f)
+        return users_data["users"]
+
     def get_user_folder(self, user_id: str):
         user_folder = os.path.join(self.base_folder, user_id)
         if not os.path.exists(user_folder):

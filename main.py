@@ -1,14 +1,20 @@
-# This is a sample Python script.
-from ReaderTrackerCoreCode import Book
+# This is where the program starts. It is the main file that will be run to start the program.
+import os
 
+from JsonStorage import JsonStorage
+from ReaderTrackerCoreCode import Book, Library
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.`
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    book = Book("tt", "tt", 3)
-    book.printBook()
+    # Define the base folder for JSON storage
+    base_folder = os.path.join(os.getcwd(), 'user_data')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    # Initialize the JsonStorage with the base folder
+    storage = JsonStorage(base_folder)
+
+    # Initialize the Library with the storage
+    library = Library(storage)
+
+    # Load the GUI
+    library.load_gui()
+
+
