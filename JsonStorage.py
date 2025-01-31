@@ -59,6 +59,7 @@ class JsonStorage(Storage, ABC):
         books_file = os.path.join(user_folder, 'books.json')
         with open(books_file, 'w') as f:
             json.dump({"name": "books", "books": []}, f)  # Initialize with the correct format
+        #TODO: decide if we want the book and read file to be added to the collections file
 
         # Create a JSON file for read books
         read_file = os.path.join(user_folder, 'read.json')
@@ -254,7 +255,11 @@ class JsonStorage(Storage, ABC):
             raise ValueError(f"Error decoding JSON for collection '{collection_name}': {e}")
 
     def get_list_of_collection_names(self, user_id: str) -> list:
+        # get the collection names from the collections file
         user_folder = self.get_user_folder(user_id)
-        collection_files = [f for f in os.listdir(user_folder) if f.endswith('.json')]
-        collection_names = [os.path.splitext(f)[0] for f in collection_files]
-        return collection_names
+        collections_file = os.path.join(user_folder, 'collections.json')
+        with open(collections_file, 'r') as f:
+            collection_names = json.load(f)
+        print(collection_names["names"])
+        return collection_names["names"]
+

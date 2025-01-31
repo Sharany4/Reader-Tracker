@@ -141,23 +141,20 @@ class Library:
         self.selected_user_label.place(x=90, y=100)
 
         # let them add a collection
-        add_collection_button = tk.Button(root, text="Add Collection")
+        add_collection_button = tk.Button(root, text="Add Collection", command=self.open_add_collection_dialog)
         add_collection_button.place(x=0, y=130)
 
         # let them remove a collection
-        remove_collection_button = tk.Button(root, text="Remove Collection")
+        remove_collection_button = tk.Button(root, text="Remove Collection", command=self.open_remove_collection_dialog)
         remove_collection_button.place(x=0, y=160)
 
         # let them add a book to a collection
-        add_book_to_collection_button = tk.Button(root, text="Add Book to Collection")
+        add_book_to_collection_button = tk.Button(root, text="Add Book to Collection", command=self.open_add_book_to_collection_dialog)
         add_book_to_collection_button.place(x=0, y=190)
 
         # let them remove a book from a collection
         remove_book_from_collection_button = tk.Button(root, text="Remove Book from Collection")
         remove_book_from_collection_button.place(x=0, y=220)
-
-
-
 
         # TODO: show list of collections of that user
         # TODO: show list of books in that collection
@@ -177,7 +174,7 @@ class Library:
         # Create a entry for the username
         user_label = tk.Label(add_user_window, text="User username:")
         user_label.pack(padx=10, pady=5)
-        user_entry = tk.Entry(add_user_window)
+        # user_entry = tk.Entry(add_user_window)
 
         # Create an entry for the user ID
         user_id_entry = tk.Entry(add_user_window)
@@ -277,6 +274,103 @@ class Library:
 
         pick_button = tk.Button(pick_user_window, text="Pick User", command=on_pick_user)
         pick_button.pack()
+
+    def open_add_collection_dialog(self):
+        # Create a new window for the dialog
+        add_coll_window = tk.Toplevel()
+        add_coll_window.title("Add Collection: ")
+
+        # Create a label for the collection name
+        coll_label = tk.Label(add_coll_window, text="Collection name:")
+        coll_label.pack(padx=10, pady=5)
+
+        # Create an entry for the collection name
+        coll_entry = tk.Entry(add_coll_window)
+        coll_entry.pack(padx=10, pady=5)
+
+        # Create the add collection button
+        def on_add_collection():
+            coll_name = coll_entry.get()
+            if not coll_name:
+                messagebox.showerror("Input Error", "Please enter a collection name")
+                return
+
+            # Check if the user already has a collection with the same name
+            if coll_name in self.storage.get_list_of_collection_names(self.current_user):
+                messagebox.showerror("Duplicate Collection", f"Collection '{coll_name}' already exists.")
+                return
+
+            if self.current_user is None:
+                messagebox.showerror("No User Selected", "Please select a user first.")
+                return
+
+            # Add the collection to the storage
+            new_coll = BookCollection(coll_name)
+            self.storage.add_collection_to_storage(new_coll, self.current_user)
+            messagebox.showinfo("Collection Added", f"Collection '{coll_name}' has been added successfully.")
+            add_coll_window.destroy()
+
+        # Create the add collection button
+        add_button = tk.Button(add_coll_window, text="Add Collection", command=on_add_collection)
+        add_button.pack()
+
+    def open_remove_collection_dialog(self):
+        # Create a new window for the dialog
+        remove_coll_window = tk.Toplevel()
+        remove_coll_window.title("Remove Collection")
+
+        # Load the list of collections from the collections.json file
+        try:
+            coll_list = self.storage.get_list_of_collection_names(self.current_user)
+            # remove the books and read collections as they should not be removed
+            # coll_list.remove("books")
+            # coll_list.remove("read")
+            if not coll_list:
+                messagebox.showerror("No Collections", "There are no collections to remove.")
+                remove_coll_window.destroy()
+                return
+        except TypeError:
+            messagebox.showerror("No User Selected", "Please select a user first")
+            remove_coll_window.destroy()
+            return
+
+        # Create label
+        coll_label = tk.Label(remove_coll_window, text="Select a collection to remove:")
+        coll_label.pack(padx=10, pady=5)
+
+        # Create a dropdown menu for the collection list
+        coll_var = tk.StringVar(remove_coll_window)
+        coll_var.set(coll_list[0])
+        coll_dropdown = tk.OptionMenu(remove_coll_window, coll_var, *coll_list)
+        coll_dropdown.pack(padx=10, pady=5)
+
+        # Create the remove collection button
+        def on_remove_collection():
+            coll_name = coll_var.get()
+            if not coll_name:
+                messagebox.showerror("Input Error", "Please enter a collection name")
+                return
+
+            try:
+                self.storage.remove_collection_from_storage(coll_name, self.current_user)
+                messagebox.showinfo("Collection Removed", f"Collection '{coll_name}' has been removed successfully.")
+                remove_coll_window.destroy()
+            except FileNotFoundError:
+                messagebox.showerror("Collection Not Found", f"Collection '{coll_name}' does not exist.")
+
+        # Create the button
+        remove_button = tk.Button(remove_coll_window, text="Remove Collection", command=on_remove_collection)
+        remove_button.pack()
+
+
+    def open_add_book_to_collection_dialog(self):
+        #todo: add a checkbox to let them choose wehich collections to add to.
+        # automatically have books picked if it is present
+
+        # Create a new window for the dialog
+        add_book_to_coll_window = tk.Toplevel()
+        add_book_to_coll_window.title("Add Book to Collection")
+
 
 
 # load up GUI
