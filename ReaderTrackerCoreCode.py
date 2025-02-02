@@ -106,6 +106,9 @@ class Library:
         self.storage = storage
         self.current_user = None
         self.selected_user_label = None
+        self.current_collection = None
+        self.selected_coll_label = None
+        self.book_listbox = None
 
     def load_gui(self):
         root = tk.Tk()  # create root widget
@@ -138,28 +141,43 @@ class Library:
         # label to show user
         # Label to display the selected user
         self.selected_user_label = tk.Label(root, text=f"Selected User: {self.current_user}")
-        self.selected_user_label.place(x=90, y=100)
+        self.selected_user_label.place(x=105, y=100)
+
+        # let them select a collection to view from a dropdown
+        select_collection_button = tk.Button(root, text="Select Collection", command=self.open_select_collection_dialog)
+        select_collection_button.place(x=0, y=130)
+
+        # label to show collection
+        self.selected_coll_label = tk.Label(root, text=f"Selected Collection: {self.current_collection}")
+        self.selected_coll_label.place(x=105, y=130)
 
         # let them add a collection
         add_collection_button = tk.Button(root, text="Add Collection", command=self.open_add_collection_dialog)
-        add_collection_button.place(x=0, y=130)
+        add_collection_button.place(x=0, y=180)
 
         # let them remove a collection
         remove_collection_button = tk.Button(root, text="Remove Collection", command=self.open_remove_collection_dialog)
-        remove_collection_button.place(x=0, y=160)
+        remove_collection_button.place(x=0, y=210)
 
         # let them add a book to a collection
-        add_book_to_collection_button = tk.Button(root, text="Add Book to Collection", command=self.open_add_book_to_collection_dialog)
-        add_book_to_collection_button.place(x=0, y=190)
+        add_book_to_collection_button = tk.Button(root, text="Add Book to Collection",
+                                                  command=self.open_add_book_dialog)
+        add_book_to_collection_button.place(x=0, y=240)
 
-        # let them remove a book from a collection
-        remove_book_from_collection_button = tk.Button(root, text="Remove Book from Collection")
-        remove_book_from_collection_button.place(x=0, y=220)
+        # let them remove a book from a collection, will be added to right side bar instead
+        # remove_book_from_collection_button = tk.Button(root, text="Remove Book from Collection")
+       #  remove_book_from_collection_button.place(x=0, y=270)
+
+        # Let them move a book, or mark as read
+
+        # TODO: will be done after can add and remove a book
+        # Create a listbox to display books
+        self.book_listbox = tk.Listbox(root)
+        self.book_listbox.place(x=250, y=30, width=300, height=400)
+        self.book_listbox.bind('<<ListboxSelect>>', self.on_book_select)
 
         # TODO: show list of collections of that user
         # TODO: show list of books in that collection
-        # TODO: add collection
-        # TODO: delete collection
         # TODO: add book to collection
         # TODO: remove book from collection
         # TODO: mark book as read
@@ -275,6 +293,52 @@ class Library:
         pick_button = tk.Button(pick_user_window, text="Pick User", command=on_pick_user)
         pick_button.pack()
 
+    def open_select_collection_dialog(self):
+        # Create a new window for the dialog
+        select_coll_window = tk.Toplevel()
+        select_coll_window.title("Select Collection")
+
+        # Load the list of collections from the collections.json file
+        try:
+            coll_list = self.storage.get_list_of_collection_names(self.current_user)
+            # Add the books and read collections
+            coll_list.append("books")
+            coll_list.append("read")
+            if not coll_list:
+                messagebox.showerror("No Collections", "There are no collections to select.")
+                select_coll_window.destroy()
+                return
+        except TypeError:
+            messagebox.showerror("No User Selected", "Please select a user first")
+            select_coll_window.destroy()
+            return
+
+        # Create a label for the dropdown menu
+        coll_label = tk.Label(select_coll_window, text="Select a collection:")
+        coll_label.pack(padx=10, pady=5)
+
+        # Create a dropdown menu for the collection list
+        coll_var = tk.StringVar(select_coll_window)
+        coll_var.set(coll_list[0])
+        coll_dropdown = tk.OptionMenu(select_coll_window, coll_var, *coll_list)
+        coll_dropdown.pack(padx=10, pady=5)
+
+        # Create the select collection button
+        def on_select_collection():
+            coll_name = coll_var.get()
+            if not coll_name:
+                messagebox.showerror("Input Error", "Please enter a collection name")
+                return
+
+            self.current_collection = coll_name
+            self.selected_coll_label.config(text=f"Selected Collection: {self.current_collection}")
+            messagebox.showinfo("Collection Selected", f"Collection '{coll_name}' has been selected successfully.")
+            select_coll_window.destroy()
+
+        # Create the button
+        select_button = tk.Button(select_coll_window, text="Select Collection", command=on_select_collection)
+        select_button.pack()
+
     def open_add_collection_dialog(self):
         # Create a new window for the dialog
         add_coll_window = tk.Toplevel()
@@ -322,9 +386,6 @@ class Library:
         # Load the list of collections from the collections.json file
         try:
             coll_list = self.storage.get_list_of_collection_names(self.current_user)
-            # remove the books and read collections as they should not be removed
-            # coll_list.remove("books")
-            # coll_list.remove("read")
             if not coll_list:
                 messagebox.showerror("No Collections", "There are no collections to remove.")
                 remove_coll_window.destroy()
@@ -362,15 +423,95 @@ class Library:
         remove_button = tk.Button(remove_coll_window, text="Remove Collection", command=on_remove_collection)
         remove_button.pack()
 
-
-    def open_add_book_to_collection_dialog(self):
-        #todo: add a checkbox to let them choose wehich collections to add to.
-        # automatically have books picked if it is present
-
+    def open_add_book_dialog(self):
         # Create a new window for the dialog
-        add_book_to_coll_window = tk.Toplevel()
-        add_book_to_coll_window.title("Add Book to Collection")
+        add_book_window = tk.Toplevel()
+        add_book_window.title("Add Book to Collection")
 
+        if self.current_user is None:
+            messagebox.showerror("No User Selected", "Please select a user first.")
+            add_book_window.destroy()
+            return
+
+        # Create a label
+        add_book_label = tk.Label(add_book_window, text="Book to add: (Auto added to 'books' collection)")
+        add_book_label.pack(padx=10, pady=5)
+
+        # Create an entry and label for the title
+        title_label = tk.Label(add_book_window, text="Title:")
+        title_label.pack(padx=10, pady=5)
+        title_entry = tk.Entry(add_book_window)
+        title_entry.pack(padx=20, pady=5)
+
+        # Create an entry and label for the author
+        author_label = tk.Label(add_book_window, text="Author:")
+        author_label.pack(padx=10, pady=5)
+        author_entry = tk.Entry(add_book_window)
+        author_entry.pack(padx=10, pady=5)
+
+        # Create an entry and label for the year
+        year_label = tk.Label(add_book_window, text="Year:")
+        year_label.pack(padx=10, pady=5)
+        year_entry = tk.Entry(add_book_window)
+        year_entry.pack(padx=10, pady=5)
+
+        # Select the collections to add to using listbox
+        collections_to_add_to_listbox = tk.Listbox(add_book_window, selectmode=tk.MULTIPLE)
+        collections_to_add_to_listbox.pack(padx=10, pady=5)
+        # Get list of collections
+        collections = self.storage.get_list_of_collection_names(self.current_user)
+        for coll in collections:
+            collections_to_add_to_listbox.insert(tk.END, coll)
+
+        def on_add_book():
+            title = title_entry.get()
+            author = author_entry.get()
+            year = year_entry.get()
+            picked_collections = collections_to_add_to_listbox.curselection()
+            if not title or not author or not year:
+                messagebox.showerror("Input Error", "Please enter a title, author, and year")
+                return
+
+            if not year.isdigit():
+                messagebox.showerror("Input Error", "Year must be a number")
+
+            new_book = Book(title, author, int(year))
+            try:
+                self.storage.add_book_to_storage(new_book, self.current_user, "books")
+                for col in picked_collections:
+                    coll_name = collections_to_add_to_listbox.get(col)
+                    self.storage.add_book_to_storage(new_book, self.current_user, coll_name)
+            except ValueError:
+                messagebox.showerror("Book Exists", f"Book '{title}' already exists in the storage. To change or mark "
+                                                    f"as read, find the mbook in storage and right click")
+                return
+
+            messagebox.showinfo("Book Added", f"Book '{title}' has been added successfully.")
+            add_book_window.destroy()
+
+        add_button = tk.Button(add_book_window, text="Add Book", command=on_add_book)
+        add_button.pack()
+
+
+    # TODO: make this work after can add and remove a book
+    def update_book_listbox(self):
+        if self.current_user and self.current_collection:
+            try:
+                collection = self.storage.load_collection_from_storage(self.current_user, self.current_collection)
+                self.book_listbox.delete(0, tk.END)
+                for book in collection.books:
+                    self.book_listbox.insert(tk.END, book.get_book_details())
+            except FileNotFoundError:
+                messagebox.showerror("Error",
+                                     f"Collection '{self.current_collection}' not found for user '{self.current_user}'")
+            except ValueError as e:
+                messagebox.showerror("Error", str(e))
+
+    # TODO: make this work after can add and remove a book
+    def on_book_select(self, event):
+        selected_index = self.book_listbox.curselection()
+        if selected_index:
+            selected_book = self.current_collection.books[selected_index[0]]
 
 
 # load up GUI

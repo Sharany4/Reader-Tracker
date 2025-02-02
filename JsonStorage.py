@@ -263,3 +263,21 @@ class JsonStorage(Storage, ABC):
         print(collection_names["names"])
         return collection_names["names"]
 
+    '''def book_not_in_storage(self, book: Book, user_id: str, collection: str) -> bool:
+        if not os.path.exists(os.path.join(self.base_folder, user_id)):
+            raise FileNotFoundError(f"User '{user_id}' does not exist")
+        user_folder = self.get_user_folder(user_id)
+        coll_file = os.path.join(user_folder, f"{collection}.json")
+        with open(coll_file, 'r') as f:
+            books_data = json.load(f)
+        return book.to_dict() not in books_data["books"]
+
+    def book_in_storage(self, book: Book, user_id: str, collection: str) -> bool:
+        if not os.path.exists(os.path.join(self.base_folder, user_id)):
+            raise FileNotFoundError(f"User '{user_id}' does not exist")
+        user_folder = self.get_user_folder(user_id)
+        coll_file = os.path.join(user_folder, f"{collection}.json")
+        with open(coll_file, 'r') as f:
+            books_data = json.load(f)
+        return book.to_dict() in books_data["books"]'''
+

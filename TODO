@@ -7,7 +7,9 @@ To-Do List for Reader Tracker Project
 2. Design and Build the GUI
     - Create GUI layout: Develop a simple interface to display books, collections, and allow interaction (e.g., adding/removing books).
     - Integrate with core functionality: Ensure that the GUI interacts with the core code (e.g., `Library` and `Storage` classes) to save/load data dynamically.
-
+    - Let the books in a collection be displayed in a table
+    - when right clicking a book, show a context menu with options to makr as read, delete, more to other collections
+    - add a search bar to search for books by title, author, etc.
 
 3. Testing and Refinement
     - Test the saving/loading functionality: Ensure that the books are being correctly saved and loaded from both JSON and database formats.
