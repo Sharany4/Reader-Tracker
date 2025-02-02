@@ -1,17 +1,17 @@
 To-Do List for Reader Tracker Project
 
-1. Design and Implement the Library Class
-    - Create the `Library` class: This class will handle book and collection management, including adding new books and retrieving the list of books.
-    - Pass the Storage Type: Make sure that the `Library` class accepts the storage type as a parameter, so it can interact with different storage backends seamlessly.
+# TODO: SHould I change the structure so that  the books store there own data and the collections are just a list of books?
 
-2. Design and Build the GUI
+1. Design and Build the GUI
     - Create GUI layout: Develop a simple interface to display books, collections, and allow interaction (e.g., adding/removing books).
     - Integrate with core functionality: Ensure that the GUI interacts with the core code (e.g., `Library` and `Storage` classes) to save/load data dynamically.
+    - change the structure of the data so the books store what collections they are in aswell ( for efficiency)
     - Let the books in a collection be displayed in a table
     - when right clicking a book, show a context menu with options to makr as read, delete, more to other collections
+    - when right clicked, scan the collectosn to see what collectiosn it be moves nad added to
     - add a search bar to search for books by title, author, etc.
 
-3. Testing and Refinement
+2. Testing and Refinement
     - Test the saving/loading functionality: Ensure that the books are being correctly saved and loaded from both JSON and database formats.
     - Test GUI functionality: Make sure the GUI correctly updates the list of books and interacts properly with the backend logic.
     - Refine the codebase: Optimize and refactor the code for maintainability and scalability.

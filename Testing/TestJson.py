@@ -589,6 +589,11 @@ class TestingJSON(unittest.TestCase):
         books_file = os.path.join(user_folder, "books.json")
         self.assertTrue(os.path.exists(books_file))
 
-
+    # --------------------------------------------------------------
+    #TODO: adding new function to map the collections to the books in the books file
+    # like how the title is stored in the book, have another key in the book that stores the collection names
+    # then update the books file when a book is added to a collection
+    # in the normal collecton files, the books remain the same
+    # the book can then be found in the books file which would have the collection names
 if __name__ == '__main__':
     unittest.main()

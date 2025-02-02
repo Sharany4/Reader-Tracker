@@ -59,7 +59,7 @@ class JsonStorage(Storage, ABC):
         books_file = os.path.join(user_folder, 'books.json')
         with open(books_file, 'w') as f:
             json.dump({"name": "books", "books": []}, f)  # Initialize with the correct format
-        #TODO: decide if we want the book and read file to be added to the collections file
+        # TODO: decide if we want the book and read file to be added to the collections file
 
         # Create a JSON file for read books
         read_file = os.path.join(user_folder, 'read.json')
@@ -126,6 +126,8 @@ class JsonStorage(Storage, ABC):
         with open(collection_path, 'w') as f:
             json.dump(collection_data, f, indent=4)
 
+        # TODO: add the collection to the book in the books file
+
     def remove_book_from_storage(self, book: Book, user_id: str, collection_name='books',
                                  remove_from_all_collections=False):  # Will be useful
         user_folder = self.get_user_folder(user_id)
@@ -177,6 +179,8 @@ class JsonStorage(Storage, ABC):
             raise IOError(f"Error removing book from collection '{collection_name}' for user '{user_id}': {e}")
         except json.JSONDecodeError as e:
             raise ValueError(f"Error decoding JSON for collection '{collection_name}': {e}")
+
+        # TODO: remove the collection to the book inthe books file
 
     def add_collection_to_storage(self, collection: BookCollection, user_id: str):
         user_folder = self.get_user_folder(user_id)
@@ -232,6 +236,8 @@ class JsonStorage(Storage, ABC):
         with open(users_collections_names_file, 'w') as f:
             json.dump(collection_names, f, indent=4)
 
+        # TODO: remove the collection from the books file for the books
+
     def load_collection_from_storage(self, user_id: str, collection_name: str) -> BookCollection:
         user_folder = self.get_user_folder(user_id)
         collection_path = os.path.join(user_folder, f"{collection_name}.json")
@@ -262,22 +268,3 @@ class JsonStorage(Storage, ABC):
             collection_names = json.load(f)
         print(collection_names["names"])
         return collection_names["names"]
-
-    '''def book_not_in_storage(self, book: Book, user_id: str, collection: str) -> bool:
-        if not os.path.exists(os.path.join(self.base_folder, user_id)):
-            raise FileNotFoundError(f"User '{user_id}' does not exist")
-        user_folder = self.get_user_folder(user_id)
-        coll_file = os.path.join(user_folder, f"{collection}.json")
-        with open(coll_file, 'r') as f:
-            books_data = json.load(f)
-        return book.to_dict() not in books_data["books"]
-
-    def book_in_storage(self, book: Book, user_id: str, collection: str) -> bool:
-        if not os.path.exists(os.path.join(self.base_folder, user_id)):
-            raise FileNotFoundError(f"User '{user_id}' does not exist")
-        user_folder = self.get_user_folder(user_id)
-        coll_file = os.path.join(user_folder, f"{collection}.json")
-        with open(coll_file, 'r') as f:
-            books_data = json.load(f)
-        return book.to_dict() in books_data["books"]'''
-

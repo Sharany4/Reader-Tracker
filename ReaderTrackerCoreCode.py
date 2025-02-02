@@ -28,11 +28,14 @@ class Book:
         storage.remove_book_from_storage(self, user_id, remove_from_all_collections=True)
         storage.add_book_to_storage(self, user_id, "read")  # add book to read list
 
-    def add_collection(self, coll: "BookCollection"):
+    def add_collection(self, coll: "BookCollection"):  # change to take str, use to ad collections from file or new
         self.collections.append(coll)
+        # change in the books file collections for this book
+        # eg json add collection to book, or should it be does when addthe book to coll?
 
-    def remove_collection(self, coll: "BookCollection"):
+    def remove_collection(self, coll: "BookCollection"):  # change to take str
         self.collections.remove(coll)
+        # change in the books file collections for this book
 
     def get_book_details(self):
         return f"Book Details: Title: {self.title}, Author: {self.author}, Year: {self.year}"
@@ -44,9 +47,12 @@ class Book:
             "year": self.year
         }
 
+        # TODO: add collections dictionary to this
+
     @staticmethod
     def from_dict(book_dict: dict):
         return Book(book_dict['title'], book_dict['author'], book_dict['year'])
+        # if the book has collections, add them to the book
 
     def book_to_json_string(self):  # makes a string representation o a json object
         return json.dumps(self.to_dict())
@@ -71,7 +77,7 @@ class BookCollection:
         if book in self.books:
             raise DuplicateError(f" Book {book} is already in the collection")
         self.books.append(book)
-        book.add_collection(self)
+        book.add_collection(self)  # str
         self.sort_books()
 
     def add_book_with_storage(self, book: Book, storage, user_id: str):
@@ -85,7 +91,7 @@ class BookCollection:
             raise ValueError("The book is not in the collection")
         self.books.remove(book)
         self.sort_books()
-        book.remove_collection(self)
+        book.remove_collection(self)  # str
 
     def remove_book_with_storage(self, book: Book, storage, user_id: str):
         self.remove_book(book)
@@ -166,7 +172,7 @@ class Library:
 
         # let them remove a book from a collection, will be added to right side bar instead
         # remove_book_from_collection_button = tk.Button(root, text="Remove Book from Collection")
-       #  remove_book_from_collection_button.place(x=0, y=270)
+        #  remove_book_from_collection_button.place(x=0, y=270)
 
         # Let them move a book, or mark as read
 
@@ -359,13 +365,13 @@ class Library:
                 messagebox.showerror("Input Error", "Please enter a collection name")
                 return
 
+            if self.current_user is None:
+                messagebox.showerror("No User Selected", "Please select a user first.")
+                return
+
             # Check if the user already has a collection with the same name
             if coll_name in self.storage.get_list_of_collection_names(self.current_user):
                 messagebox.showerror("Duplicate Collection", f"Collection '{coll_name}' already exists.")
-                return
-
-            if self.current_user is None:
-                messagebox.showerror("No User Selected", "Please select a user first.")
                 return
 
             # Add the collection to the storage
@@ -491,7 +497,6 @@ class Library:
 
         add_button = tk.Button(add_book_window, text="Add Book", command=on_add_book)
         add_button.pack()
-
 
     # TODO: make this work after can add and remove a book
     def update_book_listbox(self):
