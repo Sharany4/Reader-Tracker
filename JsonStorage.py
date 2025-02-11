@@ -151,10 +151,23 @@ class JsonStorage(Storage, ABC):
                 raise ValueError("Collection data should be a dictionary with a 'books' key")
 
             # Remove the book from the collection
-            book_dict = book.to_dict()
-            if book_dict not in collection_data["books"]:
+            # book.add_collection(collection_name)
+            book_dict = book.to_dict() # From before changing the data
+            '''if book_dict not in collection_data["books"]:
+                print("collection_data", collection_data)
                 raise ValueError(f"Book '{book.title}' is not in the collection", collection_name)
-            collection_data["books"].remove(book_dict)
+            collection_data["books"].remove(book_dict)'''
+
+            # Remove the book from the collection
+            book_found = False
+            for stored_book in collection_data["books"]:
+                if stored_book["title"] == book.title and stored_book["author"] == book.author and stored_book["year"] == book.year:
+                    collection_data["books"].remove(stored_book)
+                    book_found = True
+                    break
+            if not book_found:
+                print("collection_data, book not found", collection_data)
+                raise ValueError(f"Book '{book.title}' is not in the collection '{collection_name}'")
 
             # Write the updated collection data back to the JSON file
             with open(collection_path, 'w') as f:
@@ -268,3 +281,30 @@ class JsonStorage(Storage, ABC):
             collection_names = json.load(f)
         print(collection_names["names"])
         return collection_names["names"]
+
+    def add_collection_to_book_storage(self, book:Book, coll:BookCollection, user_id: str):
+        # print('f')
+        # find the book
+
+        user_folder = self.get_user_folder(user_id)
+        books_file = os.path.join(user_folder, 'books.json')
+        with open(books_file, 'r') as f:
+            books_data = json.load(f)
+            # print("from add collection to book storage, the books in file", books_data["books"])
+
+        for b in books_data["books"]:
+            if b["title"] == book.title and b["author"] == book.author and book.year:
+                print("found book" + book.get_book_details() + " in books file")
+                print(b["collections"])
+                b["collections"].append(coll.name)
+                with open(books_file, 'w') as f:
+                    json.dump(books_data, f, indent=4)
+                return True
+
+            print("didnt find the book")
+            return False
+
+
+        # check to see if the book is in , if so, throw error
+        # else, add the coll
+

@@ -12,6 +12,9 @@ from tkinter import messagebox
 # This class will have a title, author, year
 # It will also store what collections it is a part of
 # It will also have a to string method to represent itself
+
+#todo: change the way collections are stored. wen wanting the collection, get from storage
+# when wanting to add and remove, done for storage, and them array is updated
 class Book:
     def __init__(self, title: str, author: str, year: int):
         if not title or not author or not year:
@@ -24,16 +27,22 @@ class Book:
 
     def note_book_as_read(self, storage, user_id: str):
         for coll in self.collections:  # remove book from all collections
-            coll.remove_book(self)
-        storage.remove_book_from_storage(self, user_id, remove_from_all_collections=True)
+            storage.remove_book_from_storage(self, user_id, coll)
+        storage.remove_book_from_storage(self, user_id, remove_from_all_collections=True) #should remove from all colls
         storage.add_book_to_storage(self, user_id, "read")  # add book to read list
 
-    def add_collection(self, coll: "BookCollection"):  # change to take str, use to ad collections from file or new
+    def add_collection(self, coll: str):  # change to take str, use to ad collections from file or new
+        # todo: change so it will change add book to collection, add collection to book
         self.collections.append(coll)
         # change in the books file collections for this book
-        # eg json add collection to book, or should it be does when addthe book to coll?
+        # eg json add collection to book, or should it be does when addthe book to coll
 
-    def remove_collection(self, coll: "BookCollection"):  # change to take str
+    def add_collection_with_storage(self, coll:str, storage):
+        storage.add_collection_to_book_storage(self, coll)
+        # where will the collection add the book?
+        # self.collections = #collections for book from books file, method to get collections from storage
+
+    def remove_collection(self, coll: str):  # change to take str
         self.collections.remove(coll)
         # change in the books file collections for this book
 
@@ -44,7 +53,14 @@ class Book:
         return {
             "title": self.title,
             "author": self.author,
-            "year": self.year
+            "year": self.year,
+            # "collections": [self.collections]
+            "collections": []
+            #'''
+            #It doesnt understand how to put both colls in, like books and test coll.
+            #It doesnt see them as equal as they dont have the same collections. but we need a way to not check the
+            #collections, as they are different objects. Perhaps add mthod to jsut check the title, author and year?
+            #'''
         }
 
         # TODO: add collections dictionary to this
@@ -77,7 +93,7 @@ class BookCollection:
         if book in self.books:
             raise DuplicateError(f" Book {book} is already in the collection")
         self.books.append(book)
-        book.add_collection(self)  # str
+        book.add_collection(self.name)  # str
         self.sort_books()
 
     def add_book_with_storage(self, book: Book, storage, user_id: str):
@@ -91,7 +107,7 @@ class BookCollection:
             raise ValueError("The book is not in the collection")
         self.books.remove(book)
         self.sort_books()
-        book.remove_collection(self)  # str
+        book.remove_collection(self.name)  # str
 
     def remove_book_with_storage(self, book: Book, storage, user_id: str):
         self.remove_book(book)

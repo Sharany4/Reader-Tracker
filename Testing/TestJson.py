@@ -595,5 +595,66 @@ class TestingJSON(unittest.TestCase):
     # then update the books file when a book is added to a collection
     # in the normal collecton files, the books remain the same
     # the book can then be found in the books file which would have the collection names
+
+    def test_add_collection_to_book_storage_gets_book_data_correctly(self):
+        book1 = Book("Title", 'author', 1000)
+        collection1 = BookCollection("test_coll")
+
+        # add them to storage
+        self.storage.add_book_to_storage(book1,"test_user")
+        self.storage.add_collection_to_storage(collection1, "test_user")
+
+        # print out contents of books file
+        user_folder = self.storage.get_user_folder("test_user")
+        books_file = os.path.join(user_folder, "books.json")
+        with open(books_file, 'r') as f:
+            books_data = json.load(f)
+        print(books_data)
+
+        collections_file = os.path.join(user_folder, "collections.json")
+        with open(collections_file, 'r') as f:
+            collections_data = json.load(f)
+        self.assertIn("test_coll", collections_data["names"])
+
+        # test that we can find a specific book
+        self.assertEqual(True, self.storage.add_collection_to_book_storage(book1, collection1, "test_user"))
+
+    def test_collections_adds_to_book(self):
+        book1 = Book("Title", 'author', 1000)
+        collection1 = BookCollection("test_coll")
+
+        # add them to storage
+        self.storage.add_book_to_storage(book1, "test_user")
+        self.storage.add_collection_to_storage(collection1, "test_user")
+
+        # test that the collection adds to the book
+        self.storage.add_collection_to_book_storage(book1, collection1, "test_user")
+        user_folder = self.storage.get_user_folder("test_user")
+        books_file = os.path.join(user_folder, "books.json")
+        with open(books_file, 'r') as f:
+            books_data = json.load(f)
+        print(books_data["books"]) # can see in in the print
+        self.assertIn("test_coll", books_data["books"][0]["collections"])
+
+        # see if book stored in collection
+        self.storage.add_book_to_storage(book1, "test_user", "test_coll")
+
+        collections_file = os.path.join(user_folder, "collections.json")
+        with open(collections_file, 'r') as f:
+            collections_data = json.load(f)
+        self.assertIn("test_coll", collections_data["names"])
+
+        with open(os.path.join(self.test_folder, "test_user", "test_coll.json"), 'r') as f:
+            collection_data = json.load(f)
+        self.assertEqual(collection_data["name"], "test_coll")
+        self.assertEqual(collection_data["books"][0], book1.to_dict())
+
+    # todo: change storage so it checks books by title, author, year and not to_dict
+
+
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
