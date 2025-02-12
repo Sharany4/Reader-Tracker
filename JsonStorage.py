@@ -119,8 +119,9 @@ class JsonStorage(Storage, ABC):
             raise ValueError("Collection data should be a list, the type is: " + str(type(collection_data["books"])))
 
         # Check if the book is already in the collection
-        if book.to_dict() in collection_data["books"]:
-            raise ValueError(f"Book '{book.title}' is already in the collection '{collection_name}'")
+        for b in collection_data["books"]:
+            if b["title"] == book.title and b["author"] == book.author and b["year"] == book.year:
+                raise ValueError(f"Book '{book.title}' is already in the collection '{collection_name}'")
 
         collection_data["books"].append(book.to_dict())
         with open(collection_path, 'w') as f:
@@ -182,8 +183,9 @@ class JsonStorage(Storage, ABC):
                             collection_data = json.load(f)
 
                         if isinstance(collection_data, dict) and "books" in collection_data:
-                            if book_dict in collection_data["books"]:
-                                collection_data["books"].remove(book_dict)
+                            for b in collection_data["books"]:
+                                if b["title"] == book.title and b["author"] == book.author and b["year"] == book.year:
+                                    collection_data["books"].remove(book_dict)
 
                             with open(collection_path, 'w') as f:
                                 json.dump(collection_data, f, indent=4)
@@ -282,7 +284,7 @@ class JsonStorage(Storage, ABC):
         print(collection_names["names"])
         return collection_names["names"]
 
-    def add_collection_to_book_storage(self, book:Book, coll:BookCollection, user_id: str):
+    def add_collection_to_book_storage(self, book:Book, coll_name: str, user_id: str):
         # print('f')
         # find the book
 
@@ -296,7 +298,7 @@ class JsonStorage(Storage, ABC):
             if b["title"] == book.title and b["author"] == book.author and book.year:
                 print("found book" + book.get_book_details() + " in books file")
                 print(b["collections"])
-                b["collections"].append(coll.name)
+                b["collections"].append(coll_name)
                 with open(books_file, 'w') as f:
                     json.dump(books_data, f, indent=4)
                 return True
@@ -307,4 +309,23 @@ class JsonStorage(Storage, ABC):
 
         # check to see if the book is in , if so, throw error
         # else, add the coll
+
+
+    def get_books_collections(self, book: Book, user_id: str) :
+        user_folder = self.get_user_folder(user_id)
+        books_file = os.path.join(user_folder, 'books.json')
+        with open(books_file, 'r') as f:
+            books_data = json.load(f)
+
+        for b in books_data["books"]:
+            if b["title"] == book.title and b["author"] == book.author and book.year:
+                print("found book" + book.get_book_details() + " in books file")
+                print("the books collections: ", b["collections"])
+                return b["collections"]
+
+        raise ValueError("book is not in storage but are trying to get its collections")
+
+        #print("the books data" + books_data["books"])
+        #print("the book colls: " + books_data["collections"])
+        #return books_data["collections"]
 

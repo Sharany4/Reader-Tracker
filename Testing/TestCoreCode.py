@@ -156,6 +156,11 @@ class TestBookCollection(unittest.TestCase):
         test_coll.remove_book(TestBookCollection.test_book)
         self.assertEqual(TestBookCollection.test_book.collections, [])
 
+    def test_print_details_of_books_works(self):
+        test_book = Book("title", "author", 1000)
+        print(test_book.get_book_details())
+        self.assertEqual(test_book.get_book_details(), "Book Details: Title: title, Author: author, Year: 1000")
+
 
 if __name__ == '__main__':
     unittest.main()

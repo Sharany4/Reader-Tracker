@@ -1,7 +1,7 @@
 # In this file I am creating the core functionality for my project
 import json
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, BOTH
 
 
 # My initial implementation will be to make the user
@@ -13,7 +13,7 @@ from tkinter import messagebox
 # It will also store what collections it is a part of
 # It will also have a to string method to represent itself
 
-#todo: change the way collections are stored. wen wanting the collection, get from storage
+# todo: change the way collections are stored. wen wanting the collection, get from storage
 # when wanting to add and remove, done for storage, and them array is updated
 class Book:
     def __init__(self, title: str, author: str, year: int):
@@ -28,7 +28,8 @@ class Book:
     def note_book_as_read(self, storage, user_id: str):
         for coll in self.collections:  # remove book from all collections
             storage.remove_book_from_storage(self, user_id, coll)
-        storage.remove_book_from_storage(self, user_id, remove_from_all_collections=True) #should remove from all colls
+        storage.remove_book_from_storage(self, user_id,
+                                         remove_from_all_collections=True)  # should remove from all colls
         storage.add_book_to_storage(self, user_id, "read")  # add book to read list
 
     def add_collection(self, coll: str):  # change to take str, use to ad collections from file or new
@@ -37,10 +38,11 @@ class Book:
         # change in the books file collections for this book
         # eg json add collection to book, or should it be does when addthe book to coll
 
-    def add_collection_with_storage(self, coll:str, storage):
-        storage.add_collection_to_book_storage(self, coll)
+    def add_collection_with_storage(self, coll: str, storage, user_id):
+        storage.add_collection_to_book_storage(self, coll, user_id)
         # where will the collection add the book?
         # self.collections = #collections for book from books file, method to get collections from storage
+        self.collections = storage.get_books_collections(self, user_id)
 
     def remove_collection(self, coll: str):  # change to take str
         self.collections.remove(coll)
@@ -56,11 +58,11 @@ class Book:
             "year": self.year,
             # "collections": [self.collections]
             "collections": []
-            #'''
-            #It doesnt understand how to put both colls in, like books and test coll.
-            #It doesnt see them as equal as they dont have the same collections. but we need a way to not check the
-            #collections, as they are different objects. Perhaps add mthod to jsut check the title, author and year?
-            #'''
+            # '''
+            # It doesnt understand how to put both colls in, like books and test coll.
+            # It doesnt see them as equal as they dont have the same collections. but we need a way to not check the
+            # collections, as they are different objects. Perhaps add mthod to jsut check the title, author and year?
+            # '''
         }
 
         # TODO: add collections dictionary to this
@@ -187,8 +189,9 @@ class Library:
         add_book_to_collection_button.place(x=0, y=240)
 
         # let them remove a book from a collection, will be added to right side bar instead
-        # remove_book_from_collection_button = tk.Button(root, text="Remove Book from Collection")
-        #  remove_book_from_collection_button.place(x=0, y=270)
+        remove_book_from_collection_button = tk.Button(root, text="Remove Book from Collection",
+                                                       command=self.open_remove_book_dialog)
+        remove_book_from_collection_button.place(x=0, y=270)
 
         # Let them move a book, or mark as read
 
@@ -513,6 +516,41 @@ class Library:
 
         add_button = tk.Button(add_book_window, text="Add Book", command=on_add_book)
         add_button.pack()
+
+    def open_remove_book_dialog(self):
+        # Create a new window for the dialog
+        remove_book_window = tk.Toplevel()
+        remove_book_window.title("Remove Book from Collection")
+        # remove_book_window.geometry("500x500")
+
+        if self.current_user is None:
+            messagebox.showerror("No User Selected", "Please select a user first.")
+            remove_book_window.destroy()
+            return
+
+        # Create a label
+        remove_book_label = tk.Label(remove_book_window, text="Book to remove")
+        remove_book_label.pack(padx=10, pady=5)
+
+        # Let them search books using title
+        books_collection = self.storage.load_collection_from_storage(self.current_user, "books")
+
+        # Select the book to add to using listbox
+        books_listbox = tk.Listbox(remove_book_window)
+        books_listbox.pack(padx=10, pady=5, fill=BOTH, expand=True)
+        # Get list of books
+        books = books_collection.books
+        for b in books:
+            print(b.get_book_details())
+            print(b.title)
+            books_listbox.insert(tk.END, b.get_book_details())
+
+        # let them search for a book by title
+
+        # them let them right click the book, and opens window.
+        # new window lets them selections to remove from
+        # let them pick multiple
+        # have a check bo to remove from storage, if checked, will rmeove from books file to
 
     # TODO: make this work after can add and remove a book
     def update_book_listbox(self):
