@@ -153,7 +153,7 @@ class JsonStorage(Storage, ABC):
 
             # Remove the book from the collection
             # book.add_collection(collection_name)
-            book_dict = book.to_dict() # From before changing the data
+            book_dict = book.to_dict()  # From before changing the data
             '''if book_dict not in collection_data["books"]:
                 print("collection_data", collection_data)
                 raise ValueError(f"Book '{book.title}' is not in the collection", collection_name)
@@ -162,7 +162,8 @@ class JsonStorage(Storage, ABC):
             # Remove the book from the collection
             book_found = False
             for stored_book in collection_data["books"]:
-                if stored_book["title"] == book.title and stored_book["author"] == book.author and stored_book["year"] == book.year:
+                if stored_book["title"] == book.title and stored_book["author"] == book.author and stored_book[
+                    "year"] == book.year:
                     collection_data["books"].remove(stored_book)
                     book_found = True
                     break
@@ -284,10 +285,7 @@ class JsonStorage(Storage, ABC):
         print(collection_names["names"])
         return collection_names["names"]
 
-    def add_collection_to_book_storage(self, book:Book, coll_name: str, user_id: str):
-        # print('f')
-        # find the book
-
+    def add_collection_to_book_storage(self, book: Book, coll_name: str, user_id: str):
         user_folder = self.get_user_folder(user_id)
         books_file = os.path.join(user_folder, 'books.json')
         with open(books_file, 'r') as f:
@@ -303,15 +301,13 @@ class JsonStorage(Storage, ABC):
                     json.dump(books_data, f, indent=4)
                 return True
 
-            print("didnt find the book")
+            print("didnt find the book", books_data["books"])
             return False
-
 
         # check to see if the book is in , if so, throw error
         # else, add the coll
 
-
-    def get_books_collections(self, book: Book, user_id: str) :
+    def get_books_collections(self, book: Book, user_id: str):
         user_folder = self.get_user_folder(user_id)
         books_file = os.path.join(user_folder, 'books.json')
         with open(books_file, 'r') as f:
@@ -325,7 +321,6 @@ class JsonStorage(Storage, ABC):
 
         raise ValueError("book is not in storage but are trying to get its collections")
 
-        #print("the books data" + books_data["books"])
-        #print("the book colls: " + books_data["collections"])
-        #return books_data["collections"]
-
+        # print("the books data" + books_data["books"])
+        # print("the book colls: " + books_data["collections"])
+        # return books_data["collections"]

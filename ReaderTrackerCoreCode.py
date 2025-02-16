@@ -449,6 +449,7 @@ class Library:
         remove_button.pack()
 
     def open_add_book_dialog(self):
+        # todo: when a book is added to a collection, add it ot the collecton dict aswell
         # Create a new window for the dialog
         add_book_window = tk.Toplevel()
         add_book_window.title("Add Book to Collection")
@@ -506,6 +507,7 @@ class Library:
                 for col in picked_collections:
                     coll_name = collections_to_add_to_listbox.get(col)
                     self.storage.add_book_to_storage(new_book, self.current_user, coll_name)
+                    self.storage.add_collection_to_book_storage(new_book, coll_name, self.current_user)
             except ValueError:
                 messagebox.showerror("Book Exists", f"Book '{title}' already exists in the storage. To change or mark "
                                                     f"as read, find the mbook in storage and right click")

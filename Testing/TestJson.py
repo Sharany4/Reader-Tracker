@@ -670,6 +670,15 @@ class TestingJSON(unittest.TestCase):
         print(books_data["books"])  # can see in in the print
         self.assertIn("test_coll", books_data["books"][0]["collections"])
 
+    def test_can_find_book_in_books_file(self):
+        test_book = Book("test", "test", 1000)
+        self.storage.add_book_to_storage(test_book, "test_user")
+
+        test_coll = BookCollection("test_coll")
+        self.storage.add_collection_to_storage(test_coll, "test_user")
+
+        self.assertTrue(self.storage.add_collection_to_book_storage(test_book, "test_coll", "test_user"))
+
 
 
 

@@ -66,3 +66,15 @@ class Storage(ABC):
         Get list of collections so the user can pick
         """
         pass
+
+    def add_collection_to_book_storage(self, book: Book, coll_name: str, user_id: str):
+        """
+        Add the collection to the book object in storage
+        """
+        pass
+
+    def get_books_collections(self, book: Book, user_id: str):
+        """
+        Return a list of the collections a book is in
+        """
+        pass
