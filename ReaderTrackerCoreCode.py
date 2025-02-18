@@ -184,7 +184,7 @@ class Library:
         remove_collection_button.place(x=0, y=210)
 
         # let them add a book to a collection
-        add_book_to_collection_button = tk.Button(root, text="Add Book to Collection",
+        add_book_to_collection_button = tk.Button(root, text="Add Book",
                                                   command=self.open_add_book_dialog)
         add_book_to_collection_button.place(x=0, y=240)
 
@@ -523,6 +523,7 @@ class Library:
     def open_remove_book_dialog(self):
         # Create a new window for the dialog
         remove_book_window = tk.Toplevel()
+        remove_book_window.minsize(300, 500)
         remove_book_window.title("Remove Book from Collection")
         # remove_book_window.geometry("500x500")
 
@@ -544,9 +545,50 @@ class Library:
         # Get list of books
         books = books_collection.books
         for b in books:
-            print(b.get_book_details())
-            print(b.title)
-            books_listbox.insert(tk.END, b.get_book_details())
+            book_string = b.title + " by " + b.author + " " + str(b.year)
+            print(book_string)
+            # print(b.title)
+            books_listbox.insert(tk.END, book_string)
+
+        def get_book_from_description(book_string: str):
+            res = book_string.split(" ") # to store the words
+            last_index_of_title = None # use this index to extract data
+            title_string = ""
+            author_string = ""
+            year = -1
+            for i in range(len(res)):  # go through elements
+                if res[i] == "by":
+                    last_index_of_title = i
+                    for j in range(last_index_of_title): # add the title parts to title string
+                        # print("title " + res[j])
+                        title_string += res[j] + " " # to add space
+
+                    for r in range(i + 1, len(res) - 1):# add the author parts to author string
+                        # print("author " + res[r])
+                        author_string += res[r] + " "
+
+                    print("title: " + title_string)
+                    print("author: " + author_string)
+                    print("year " + res[len(res) - 1])
+                    year = res[len(res)-1] # assign data
+                    title_string = title_string[:len(title_string)-1] # remove last character so the strings are correct
+                    author_string = author_string[:len(author_string)-1]
+            return Book(title_string, author_string, year)
+
+
+        def on_remove_book():
+            selected_indices = books_listbox.curselection()
+            if selected_indices:
+                selected_index = selected_indices[0]
+                selected_item = books_listbox.get(selected_index)
+                print("Selected item: " + selected_item)
+                get_book_from_description(selected_item)
+
+                # opens a window of collections it is it, can select multiple to remove
+
+        remove_button = tk.Button(remove_book_window, text="Remove Book", command=on_remove_book)
+        remove_button.pack()
+        # todo: extract the details correctly from the chosen book
 
         # let them search for a book by title
 
