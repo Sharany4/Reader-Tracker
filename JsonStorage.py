@@ -293,7 +293,7 @@ class JsonStorage(Storage, ABC):
             # print("from add collection to book storage, the books in file", books_data["books"])
 
         for b in books_data["books"]:
-            if b["title"] == book.title and b["author"] == book.author and book.year:
+            if b["title"] == book.title and b["author"] == book.author and b["year"] == book.year:
                 print("found book" + book.get_book_details() + " in books file")
                 print(b["collections"])
                 b["collections"].append(coll_name)
@@ -301,8 +301,9 @@ class JsonStorage(Storage, ABC):
                     json.dump(books_data, f, indent=4)
                 return True
 
-            print("didnt find the book", books_data["books"])
-            return False
+        print("didnt find the book" + book.get_book_details())
+        print(books_data["books"])
+        return False
 
         # check to see if the book is in , if so, throw error
         # else, add the coll

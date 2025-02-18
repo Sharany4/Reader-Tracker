@@ -506,6 +506,7 @@ class Library:
                 self.storage.add_book_to_storage(new_book, self.current_user, "books")
                 for col in picked_collections:
                     coll_name = collections_to_add_to_listbox.get(col)
+                    print("coll name pucked " + coll_name)
                     self.storage.add_book_to_storage(new_book, self.current_user, coll_name)
                     self.storage.add_collection_to_book_storage(new_book, coll_name, self.current_user)
             except ValueError:
