@@ -193,6 +193,8 @@ class Library:
                                                        command=self.open_remove_book_dialog)
         remove_book_from_collection_button.place(x=0, y=270)
 
+        # todo: creat button to add book to new collections
+
         # Let them move a book, or mark as read
 
         # TODO: will be done after can add and remove a book
@@ -551,40 +553,51 @@ class Library:
             books_listbox.insert(tk.END, book_string)
 
         def get_book_from_description(book_string: str):
-            res = book_string.split(" ") # to store the words
-            last_index_of_title = None # use this index to extract data
+            res = book_string.split(" ")  # to store the words
+            last_index_of_title = None  # use this index to extract data
             title_string = ""
             author_string = ""
             year = -1
             for i in range(len(res)):  # go through elements
                 if res[i] == "by":
                     last_index_of_title = i
-                    for j in range(last_index_of_title): # add the title parts to title string
+                    for j in range(last_index_of_title):  # add the title parts to title string
                         # print("title " + res[j])
-                        title_string += res[j] + " " # to add space
+                        title_string += res[j] + " "  # to add space
 
-                    for r in range(i + 1, len(res) - 1):# add the author parts to author string
+                    for r in range(i + 1, len(res) - 1):  # add the author parts to author string
                         # print("author " + res[r])
                         author_string += res[r] + " "
 
                     print("title: " + title_string)
                     print("author: " + author_string)
                     print("year " + res[len(res) - 1])
-                    year = res[len(res)-1] # assign data
-                    title_string = title_string[:len(title_string)-1] # remove last character so the strings are correct
-                    author_string = author_string[:len(author_string)-1]
-            return Book(title_string, author_string, year)
+                    year = res[len(res) - 1]  # assign data
+                    title_string = title_string[
+                                   :len(title_string) - 1]  # remove last character so the strings are correct
+                    author_string = author_string[:len(author_string) - 1]
 
+                    # assert(title_string == books[1].title)
+                    # assert(author_string == books[1].author)
+                    # assert(int(year) == books[1].year)
+            return Book(title_string, author_string, int(year))
 
         def on_remove_book():
+            boxmessage = "The book was not removed"
+            # todo: select remove from all button, remove from some collections(lets see what cols its in,and selcted to remove)
             selected_indices = books_listbox.curselection()
             if selected_indices:
                 selected_index = selected_indices[0]
                 selected_item = books_listbox.get(selected_index)
                 print("Selected item: " + selected_item)
-                get_book_from_description(selected_item)
+                book_to_remove = get_book_from_description(selected_item)
+                self.storage.remove_book_from_storage(book_to_remove, self.current_user, remove_from_all_collections = True)
+                boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
 
-                # opens a window of collections it is it, can select multiple to remove
+            messagebox.showinfo("Book Removed", boxmessage)
+            remove_book_window.destroy()
+
+            # opens a window of collections it is it, can select multiple to remove
 
         remove_button = tk.Button(remove_book_window, text="Remove Book", command=on_remove_book)
         remove_button.pack()
