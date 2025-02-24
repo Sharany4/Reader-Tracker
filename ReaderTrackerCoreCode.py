@@ -552,6 +552,13 @@ class Library:
             # print(b.title)
             books_listbox.insert(tk.END, book_string)
 
+        # Make remove from all storage checkbox
+        # todo: need to make it flip the boolean
+        remove_from_all_storage = tk.BooleanVar()
+        remove_from_storage_checkbox = tk.Checkbutton(remove_book_window, text="Remove book from storage?",
+                                                      variable=remove_from_all_storage)
+        remove_from_storage_checkbox.pack()
+
         def get_book_from_description(book_string: str):
             res = book_string.split(" ")  # to store the words
             last_index_of_title = None  # use this index to extract data
@@ -591,7 +598,8 @@ class Library:
                 selected_item = books_listbox.get(selected_index)
                 print("Selected item: " + selected_item)
                 book_to_remove = get_book_from_description(selected_item)
-                self.storage.remove_book_from_storage(book_to_remove, self.current_user, remove_from_all_collections = True)
+                self.storage.remove_book_from_storage(book_to_remove, self.current_user,
+                                                      remove_from_all_collections=True)
                 boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
 
             messagebox.showinfo("Book Removed", boxmessage)
