@@ -3,6 +3,8 @@ import json
 import tkinter as tk
 from tkinter import messagebox, BOTH
 
+import AppFunctionCode
+
 
 # My initial implementation will be to make the user
 # able to add and remove from a tobe read list ,and move to a read list.
@@ -227,18 +229,7 @@ class Library:
 
         # create the add user button
         def on_add_user():
-            user_name = user_id_entry.get()
-            if not user_name:  # if it is entered
-                messagebox.showerror("Input Error", "Please enter a user name")
-                return
-
-            try:
-                self.storage.add_user_to_storage(user_name)
-                messagebox.showinfo("User Added", f"User '{user_name}' has been added successfully.")
-                print("added the user to storage")
-                add_user_window.destroy()
-            except FileExistsError:
-                messagebox.showerror("User Exists", f"User '{user_name}' already exists.")
+            AppFunctionCode.GUICode.on_add_user(self, user_id_entry, add_user_window)
 
         add_button = tk.Button(add_user_window, text="Add User", command=on_add_user)
         add_button.pack()
@@ -268,17 +259,7 @@ class Library:
 
         # create the remove user button
         def on_remove_user():
-            user_name = user_var.get()
-            if not user_name:  # if it is entered
-                messagebox.showerror("Input Error", "Please enter a user name")
-
-            try:
-                self.storage.remove_user_from_storage(user_name)
-                messagebox.showinfo("User Removed", f"User '{user_name}' has been removed successfully.")
-                print("removed the user to storage")
-                remove_user_window.destroy()
-            except FileNotFoundError:
-                messagebox.showerror("User Not Found", f"User '{user_name}' does not exist.")
+            AppFunctionCode.GUICode.on_remove_user(self, user_var, remove_user_window)
 
         remove_button = tk.Button(remove_user_window, text="Remove User", command=on_remove_user)
         remove_button.pack()
@@ -308,14 +289,7 @@ class Library:
 
         # create the remove user button
         def on_pick_user():
-            user_name = user_var.get()
-            if not user_name:  # if it is entered
-                messagebox.showerror("Input Error", "Please enter a user name")
-
-            self.current_user = user_name
-            self.selected_user_label.config(text=f"Selected User: {self.current_user}")
-            messagebox.showinfo("User Picked", f"User '{user_name}' has been picked successfully.")
-            pick_user_window.destroy()
+            AppFunctionCode.GUICode.on_pick_user(self, user_var, pick_user_window)
 
         pick_button = tk.Button(pick_user_window, text="Pick User", command=on_pick_user)
         pick_button.pack()
@@ -352,15 +326,7 @@ class Library:
 
         # Create the select collection button
         def on_select_collection():
-            coll_name = coll_var.get()
-            if not coll_name:
-                messagebox.showerror("Input Error", "Please enter a collection name")
-                return
-
-            self.current_collection = coll_name
-            self.selected_coll_label.config(text=f"Selected Collection: {self.current_collection}")
-            messagebox.showinfo("Collection Selected", f"Collection '{coll_name}' has been selected successfully.")
-            select_coll_window.destroy()
+            AppFunctionCode.GUICode.on_select_collection(self, coll_var, select_coll_window)
 
         # Create the button
         select_button = tk.Button(select_coll_window, text="Select Collection", command=on_select_collection)
@@ -381,25 +347,7 @@ class Library:
 
         # Create the add collection button
         def on_add_collection():
-            coll_name = coll_entry.get()
-            if not coll_name:
-                messagebox.showerror("Input Error", "Please enter a collection name")
-                return
-
-            if self.current_user is None:
-                messagebox.showerror("No User Selected", "Please select a user first.")
-                return
-
-            # Check if the user already has a collection with the same name
-            if coll_name in self.storage.get_list_of_collection_names(self.current_user):
-                messagebox.showerror("Duplicate Collection", f"Collection '{coll_name}' already exists.")
-                return
-
-            # Add the collection to the storage
-            new_coll = BookCollection(coll_name)
-            self.storage.add_collection_to_storage(new_coll, self.current_user)
-            messagebox.showinfo("Collection Added", f"Collection '{coll_name}' has been added successfully.")
-            add_coll_window.destroy()
+            AppFunctionCode.GUICode.on_add_collection(self, coll_entry, add_coll_window)
 
         # Create the add collection button
         add_button = tk.Button(add_coll_window, text="Add Collection", command=on_add_collection)
@@ -434,17 +382,7 @@ class Library:
 
         # Create the remove collection button
         def on_remove_collection():
-            coll_name = coll_var.get()
-            if not coll_name:
-                messagebox.showerror("Input Error", "Please enter a collection name")
-                return
-
-            try:
-                self.storage.remove_collection_from_storage(coll_name, self.current_user)
-                messagebox.showinfo("Collection Removed", f"Collection '{coll_name}' has been removed successfully.")
-                remove_coll_window.destroy()
-            except FileNotFoundError:
-                messagebox.showerror("Collection Not Found", f"Collection '{coll_name}' does not exist.")
+            AppFunctionCode.GUICode.on_remove_collection(self, coll_var, remove_coll_window)
 
         # Create the button
         remove_button = tk.Button(remove_coll_window, text="Remove Collection", command=on_remove_collection)
@@ -591,16 +529,26 @@ class Library:
 
         def on_remove_book():
             boxmessage = "The book was not removed"
-            # todo: select remove from all button, remove from some collections(lets see what cols its in,and selcted to remove)
+            # todo: remove from some collections(lets see what cols its in,and selcted to remove)
             selected_indices = books_listbox.curselection()
             if selected_indices:
                 selected_index = selected_indices[0]
                 selected_item = books_listbox.get(selected_index)
                 print("Selected item: " + selected_item)
                 book_to_remove = get_book_from_description(selected_item)
-                self.storage.remove_book_from_storage(book_to_remove, self.current_user,
-                                                      remove_from_all_collections=True)
-                boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
+                # self.storage.remove_book_from_storage(book_to_remove, self.current_user,
+                #                                     remove_from_all_collections=True)
+                # todo: let the user right click on the book, pick what collections they want to remove from with list box
+
+                if remove_from_all_storage.get() == True:
+                    print("You want to remove the book from all of storage")
+                    self.storage.remove_book_from_storage(book_to_remove, self.current_user,
+                                                          remove_from_all_collections=True)
+                    boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
+                else:
+                    print("You do not want to remove the book from all of storage")
+
+                # boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
 
             messagebox.showinfo("Book Removed", boxmessage)
             remove_book_window.destroy()
@@ -609,7 +557,6 @@ class Library:
 
         remove_button = tk.Button(remove_book_window, text="Remove Book", command=on_remove_book)
         remove_button.pack()
-        # todo: extract the details correctly from the chosen book
 
         # let them search for a book by title
 
