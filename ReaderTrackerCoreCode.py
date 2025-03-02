@@ -28,6 +28,7 @@ class Book:
         self.collections = []
 
     def note_book_as_read(self, storage, user_id: str):
+        # todo: is the forloop needed if we are removign from all collections?
         for coll in self.collections:  # remove book from all collections
             storage.remove_book_from_storage(self, user_id, coll)
         storage.remove_book_from_storage(self, user_id,
@@ -58,13 +59,7 @@ class Book:
             "title": self.title,
             "author": self.author,
             "year": self.year,
-            # "collections": [self.collections]
             "collections": []
-            # '''
-            # It doesnt understand how to put both colls in, like books and test coll.
-            # It doesnt see them as equal as they dont have the same collections. but we need a way to not check the
-            # collections, as they are different objects. Perhaps add mthod to jsut check the title, author and year?
-            # '''
         }
 
         # TODO: add collections dictionary to this
@@ -430,32 +425,8 @@ class Library:
             collections_to_add_to_listbox.insert(tk.END, coll)
 
         def on_add_book():
-            title = title_entry.get()
-            author = author_entry.get()
-            year = year_entry.get()
-            picked_collections = collections_to_add_to_listbox.curselection()
-            if not title or not author or not year:
-                messagebox.showerror("Input Error", "Please enter a title, author, and year")
-                return
-
-            if not year.isdigit():
-                messagebox.showerror("Input Error", "Year must be a number")
-
-            new_book = Book(title, author, int(year))
-            try:
-                self.storage.add_book_to_storage(new_book, self.current_user, "books")
-                for col in picked_collections:
-                    coll_name = collections_to_add_to_listbox.get(col)
-                    print("coll name pucked " + coll_name)
-                    self.storage.add_book_to_storage(new_book, self.current_user, coll_name)
-                    self.storage.add_collection_to_book_storage(new_book, coll_name, self.current_user)
-            except ValueError:
-                messagebox.showerror("Book Exists", f"Book '{title}' already exists in the storage. To change or mark "
-                                                    f"as read, find the mbook in storage and right click")
-                return
-
-            messagebox.showinfo("Book Added", f"Book '{title}' has been added successfully.")
-            add_book_window.destroy()
+            AppFunctionCode.GUICode.on_add_book(self, title_entry, author_entry, year_entry,
+                                                collections_to_add_to_listbox, add_book_window)
 
         add_button = tk.Button(add_book_window, text="Add Book", command=on_add_book)
         add_button.pack()
@@ -491,79 +462,16 @@ class Library:
             books_listbox.insert(tk.END, book_string)
 
         # Make remove from all storage checkbox
-        # todo: need to make it flip the boolean
         remove_from_all_storage = tk.BooleanVar()
         remove_from_storage_checkbox = tk.Checkbutton(remove_book_window, text="Remove book from storage?",
                                                       variable=remove_from_all_storage)
         remove_from_storage_checkbox.pack()
 
-        def get_book_from_description(book_string: str):
-            res = book_string.split(" ")  # to store the words
-            last_index_of_title = None  # use this index to extract data
-            title_string = ""
-            author_string = ""
-            year = -1
-            for i in range(len(res)):  # go through elements
-                if res[i] == "by":
-                    last_index_of_title = i
-                    for j in range(last_index_of_title):  # add the title parts to title string
-                        # print("title " + res[j])
-                        title_string += res[j] + " "  # to add space
-
-                    for r in range(i + 1, len(res) - 1):  # add the author parts to author string
-                        # print("author " + res[r])
-                        author_string += res[r] + " "
-
-                    print("title: " + title_string)
-                    print("author: " + author_string)
-                    print("year " + res[len(res) - 1])
-                    year = res[len(res) - 1]  # assign data
-                    title_string = title_string[
-                                   :len(title_string) - 1]  # remove last character so the strings are correct
-                    author_string = author_string[:len(author_string) - 1]
-
-                    # assert(title_string == books[1].title)
-                    # assert(author_string == books[1].author)
-                    # assert(int(year) == books[1].year)
-            return Book(title_string, author_string, int(year))
-
         def on_remove_book():
-            boxmessage = "The book was not removed"
-            # todo: remove from some collections(lets see what cols its in,and selcted to remove)
-            selected_indices = books_listbox.curselection()
-            if selected_indices:
-                selected_index = selected_indices[0]
-                selected_item = books_listbox.get(selected_index)
-                print("Selected item: " + selected_item)
-                book_to_remove = get_book_from_description(selected_item)
-                # self.storage.remove_book_from_storage(book_to_remove, self.current_user,
-                #                                     remove_from_all_collections=True)
-                # todo: let the user right click on the book, pick what collections they want to remove from with list box
-
-                if remove_from_all_storage.get() == True:
-                    print("You want to remove the book from all of storage")
-                    self.storage.remove_book_from_storage(book_to_remove, self.current_user,
-                                                          remove_from_all_collections=True)
-                    boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
-                else:
-                    print("You do not want to remove the book from all of storage")
-
-                # boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
-
-            messagebox.showinfo("Book Removed", boxmessage)
-            remove_book_window.destroy()
-
-            # opens a window of collections it is it, can select multiple to remove
+            AppFunctionCode.GUICode.on_remove_book(self, books_listbox, remove_from_all_storage, remove_book_window)
 
         remove_button = tk.Button(remove_book_window, text="Remove Book", command=on_remove_book)
         remove_button.pack()
-
-        # let them search for a book by title
-
-        # them let them right click the book, and opens window.
-        # new window lets them selections to remove from
-        # let them pick multiple
-        # have a check bo to remove from storage, if checked, will rmeove from books file to
 
     # TODO: make this work after can add and remove a book
     def update_book_listbox(self):
@@ -584,19 +492,6 @@ class Library:
         selected_index = self.book_listbox.curselection()
         if selected_index:
             selected_book = self.current_collection.books[selected_index[0]]
-
-
-# load up GUI
-# let user pick user or create one ( when created forms them a json folder or add to database)
-# let user see collections to view
-# let user click collections and books to mark as read
-# load collections
-# add collection
-# delete collection
-# add book to this collection
-# add book in general to storage
-# remove book from this collection
-# remove book in general from storage
 
 
 # class for creating an exception when trying to add a duplicate
