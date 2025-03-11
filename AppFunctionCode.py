@@ -196,3 +196,8 @@ class GUICode:
         # new window lets them selections to remove from
         # let them pick multiple
         # have a check bo to remove from storage, if checked, will rmeove from books file to
+
+    @staticmethod
+    def on_right_click_book(event, list_box):
+        eventstring = "event string: " + str(event) + str(list_box.curselection())
+        print(eventstring)

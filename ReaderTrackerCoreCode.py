@@ -35,6 +35,8 @@ class Book:
                                          remove_from_all_collections=True)  # should remove from all colls
         storage.add_book_to_storage(self, user_id, "read")  # add book to read list
 
+
+    #todo: to remove as this should only be donbe with storage
     def add_collection(self, coll: str):  # change to take str, use to ad collections from file or new
         # todo: change so it will change add book to collection, add collection to book
         self.collections.append(coll)
@@ -453,6 +455,10 @@ class Library:
         # Select the book to add to using listbox
         books_listbox = tk.Listbox(remove_book_window)
         books_listbox.pack(padx=10, pady=5, fill=BOTH, expand=True)
+
+        # When right click on a book, open window to allow removing from some collections
+        books_listbox.bind('<<ListboxSelect>>', lambda event: AppFunctionCode.GUICode.on_right_click_book(event, books_listbox))
+
         # Get list of books
         books = books_collection.books
         for b in books:
@@ -466,6 +472,8 @@ class Library:
         remove_from_storage_checkbox = tk.Checkbutton(remove_book_window, text="Remove book from storage?",
                                                       variable=remove_from_all_storage)
         remove_from_storage_checkbox.pack()
+
+
 
         def on_remove_book():
             AppFunctionCode.GUICode.on_remove_book(self, books_listbox, remove_from_all_storage, remove_book_window)
