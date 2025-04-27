@@ -57,6 +57,10 @@ class GUICode:
         messagebox.showinfo("Collection Selected", f"Collection '{coll_name}' has been selected successfully.")
         select_coll_window.destroy()
 
+        #todo: display the books in that collection in the window
+        #need to pass through the listbox and empty it, then put all the books in coll in it
+
+
     @staticmethod
     def on_add_collection(library, coll_entry: Entry, add_coll_window):
         from ReaderTrackerCoreCode import BookCollection

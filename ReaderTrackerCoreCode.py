@@ -202,10 +202,7 @@ class Library:
         self.book_listbox.place(x=250, y=30, width=300, height=400)
         self.book_listbox.bind('<<ListboxSelect>>', self.on_book_select)
 
-        # TODO: show list of collections of that user
         # TODO: show list of books in that collection
-        # TODO: add book to collection
-        # TODO: remove book from collection
         # TODO: mark book as read
 
         root.mainloop()  # runs the main event loop
