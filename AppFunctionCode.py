@@ -164,7 +164,6 @@ class GUICode:
     @staticmethod
     def on_remove_book(library, books_listbox: Listbox, remove_from_all_storage: BooleanVar, remove_book_window):
         boxmessage = "The book was not removed"
-        # todo: remove from some collections(lets see what cols its in,and selcted to remove)
         selected_indices = books_listbox.curselection()
         if selected_indices:
             selected_index = selected_indices[0]
@@ -201,3 +200,9 @@ class GUICode:
     def on_right_click_book(event, list_box):
         eventstring = "event string: " + str(event) + str(list_box.curselection())
         print(eventstring)
+
+        # close the remove book window
+
+
+
+        #open a window to select to remove from other collections

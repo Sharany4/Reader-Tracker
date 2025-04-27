@@ -1,7 +1,6 @@
 To-Do List for Reader Tracker Project
 
 1. Design and Build the GUI
-    - Finish remove book button to allow removal from all collections, or just some collections
     - Let the books in a collection be displayed in a table
     - when right clicking a book, show a context menu with options to mark as read, delete, more to other collections
     - when right clicked, scan the collection to see what collection it be moves nad added to
