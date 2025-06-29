@@ -166,6 +166,7 @@ class GUICode:
         return Book(title_string, author_string, int(year))
 
     @staticmethod
+    #todo let them remove the book from the selectd collection aswell
     def on_remove_book(library, books_listbox: Listbox, remove_from_all_storage: BooleanVar, remove_book_window):
         boxmessage = "The book was not removed"
         selected_indices = books_listbox.curselection()

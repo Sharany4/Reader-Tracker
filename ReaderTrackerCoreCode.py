@@ -35,7 +35,6 @@ class Book:
                                          remove_from_all_collections=True)  # should remove from all colls
         storage.add_book_to_storage(self, user_id, "read")  # add book to read list
 
-
     #todo: to remove as this should only be donbe with storage
     def add_collection(self, coll: str):  # change to take str, use to ad collections from file or new
         # todo: change so it will change add book to collection, add collection to book
