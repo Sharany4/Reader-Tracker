@@ -1,10 +1,10 @@
 To-Do List for Reader Tracker Project
 
 to do immediately
+- finish the test in TestJson.py
 - check that the todos and try to fix if possible
-- check whether the book structure needs to
-- check if we need to have the collections list of books listi nthe python object, does it ever get used? as tey are ddded to storage
-- allow the user to remove books fr om the seelcted collection,tell them which it will remove from aswell
+- check if we need to have the collections list of books list in the python object, does it ever get used? as they are added to storage
+- allow the user to remove books fr om the selected collection,tell them which it will remove from as well
 
 1. Design and Build the GUI
     - Let the books in a collection be displayed in a table

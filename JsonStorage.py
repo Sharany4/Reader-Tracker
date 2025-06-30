@@ -59,7 +59,7 @@ class JsonStorage(Storage, ABC):
         books_file = os.path.join(user_folder, 'books.json')
         with open(books_file, 'w') as f:
             json.dump({"name": "books", "books": []}, f)  # Initialize with the correct format
-        # TODO: decide if we want the book and read file to be added to the collections file
+        # The books file and read file wiull not be added to collections file to prevent user from deleting them
 
         # Create a JSON file for read books
         read_file = os.path.join(user_folder, 'read.json')
@@ -126,8 +126,7 @@ class JsonStorage(Storage, ABC):
         collection_data["books"].append(book.to_dict())
         with open(collection_path, 'w') as f:
             json.dump(collection_data, f, indent=4)
-
-        # TODO: add the collection to the book in the books file
+        # The collection is added to the book in AppFunctionCode 'on_add_book' function
 
     def remove_book_from_storage(self, book: Book, user_id: str, collection_name='books',
                                  remove_from_all_collections=False):  # Will be useful
@@ -196,7 +195,7 @@ class JsonStorage(Storage, ABC):
         except json.JSONDecodeError as e:
             raise ValueError(f"Error decoding JSON for collection '{collection_name}': {e}")
 
-        # TODO: remove the collection to the book inthe books file
+        # TODO: remove the collection to the book in the books file
 
     def add_collection_to_storage(self, collection: BookCollection, user_id: str):
         user_folder = self.get_user_folder(user_id)
@@ -253,6 +252,10 @@ class JsonStorage(Storage, ABC):
             json.dump(collection_names, f, indent=4)
 
         # TODO: remove the collection from the books file for the books
+        '''
+        if a collection is removed from storage, we also have to remove it from the book thati s tracking it
+        Since the list of the collections for that books are only in books.json, this is the only place it needs to be removed
+        '''
 
     def load_collection_from_storage(self, user_id: str, collection_name: str) -> BookCollection:
         user_folder = self.get_user_folder(user_id)

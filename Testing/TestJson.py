@@ -679,7 +679,26 @@ class TestingJSON(unittest.TestCase):
 
         self.assertTrue(self.storage.add_collection_to_book_storage(test_book, "test_coll", "test_user"))
 
+    # todo finish writing this test
+    def test_removing_book_from_collection_removed_the_collection_from_the_book_in_booksjson(self):
+        # make a book
+        test_book = Book("test", "test", 1000)
+        self.storage.add_book_to_storage(test_book, "test_user")
 
+        # make a collection
+        test_coll = BookCollection("test_coll")
+        self.storage.add_collection_to_storage(test_coll, "test_user")
+
+        # add the book to the collection
+        test_coll.add_book_with_storage(test_book, self.storage, "test_user")
+
+        # remove the book from the collection
+        self.storage.remove_book_from_storage(test_book, "test_user", collection_name='test_coll', remove_from_all_collections=False)
+
+        # make sure the book is gone from collection
+        #self.assertTrue()
+
+        # make sure the collection is gone for the book in books.json
 
 
 
