@@ -688,17 +688,44 @@ class TestingJSON(unittest.TestCase):
         # make a collection
         test_coll = BookCollection("test_coll")
         self.storage.add_collection_to_storage(test_coll, "test_user")
+        self.storage.add_book_to_storage(test_book, "test_user", collection_name="test_coll")
+        self.storage.add_collection_to_book_storage(test_book, "test_coll", "test_user")
+        collection_path = os.path.join(self.test_folder, "test_user", "test_coll.json")
+
+        self.assertTrue(os.path.exists(collection_path))
 
         # add the book to the collection
-        test_coll.add_book_with_storage(test_book, self.storage, "test_user")
+        #  THIS DIDNT WORK, NEED TO REMOVE IT FROM THE CODE, THIS FUNCTION
+        # test_coll.add_book_with_storage(test_book, self.storage, "test_user")
+
+
+
+        #
+
+        # seems fishy
+        # print the book from nooks json before removing
+        user_books_path = os.path.join(self.test_folder, "test_user", "books.json")
+        with open(user_books_path, 'r') as f:
+            books_data_before = json.load(f)
+        print("Before adding book: ", books_data_before)
 
         # remove the book from the collection
         self.storage.remove_book_from_storage(test_book, "test_user", collection_name='test_coll', remove_from_all_collections=False)
 
+
+
         # make sure the book is gone from collection
-        #self.assertTrue()
+
+
+        # print hte book after removing
+        user_books_path = os.path.join(self.test_folder, "test_user", "books.json")
+        with open(user_books_path, 'r') as f:
+            books_data_after = json.load(f)
+        print("Before removing book: ", books_data_after)
+
 
         # make sure the collection is gone for the book in books.json
+
 
 
 

@@ -186,7 +186,8 @@ class GUICode:
                 boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
             else:
                 print("You do not want to remove the book from all of storage")
-
+                library.storage.remove_collection_from_book_storage(book_to_remove, library.current_collection, library.current_user)
+                library.storage.remove_book_from_storage(book_to_remove, library.current_user,collection_name=library.current_collection)
             # boxmessage = f"Book '{book_to_remove.title}' has been removed successfully."
 
         messagebox.showinfo("Book Removed", boxmessage)

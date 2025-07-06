@@ -1,7 +1,9 @@
 To-Do List for Reader Tracker Project
 
 to do immediately
-- finish the test in TestJson.py
+- do the boundary checking for removing a book from specific location (add error checking for if the collection is not in that person)
+- - check library and appfunctioncode, and write tests
+- make sure that when a new user is chosen, the chosen collection goes back to default
 - check that the todos and try to fix if possible
 - check if we need to have the collections list of books list in the python object, does it ever get used? as they are added to storage
 - allow the user to remove books fr om the selected collection,tell them which it will remove from as well

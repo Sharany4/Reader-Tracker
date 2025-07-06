@@ -298,7 +298,7 @@ class JsonStorage(Storage, ABC):
         for b in books_data["books"]:
             if b["title"] == book.title and b["author"] == book.author and b["year"] == book.year:
                 print("found book" + book.get_book_details() + " in books file")
-                print(b["collections"])
+                #print(b["collections"])
                 b["collections"].append(coll_name)
                 with open(books_file, 'w') as f:
                     json.dump(books_data, f, indent=4)
@@ -310,6 +310,28 @@ class JsonStorage(Storage, ABC):
 
         # check to see if the book is in , if so, throw error
         # else, add the coll
+
+    #todo test this function
+    def remove_collection_from_book_storage(self, book: Book, coll_name: str, user_id: str):
+        user_folder = self.get_user_folder(user_id)
+        books_file = os.path.join(user_folder, 'books.json')
+        with open(books_file, 'r') as f:
+            books_data = json.load(f)
+            # print("from add collection to book storage, the books in file", books_data["books"])
+
+        for b in books_data["books"]:
+            if b["title"] == book.title and b["author"] == book.author and b["year"] == book.year:
+                print("found book" + book.get_book_details() + " in books file")
+                print(b["collections"])
+                b["collections"].remove(coll_name)
+                with open(books_file, 'w') as f:
+                    json.dump(books_data, f, indent=4)
+                return True
+
+        print("didnt find the book" + book.get_book_details())
+        print(books_data["books"])
+        return False
+
 
     def get_books_collections(self, book: Book, user_id: str):
         user_folder = self.get_user_folder(user_id)
